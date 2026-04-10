@@ -36,9 +36,9 @@ void AirspeedIndicator_Init(AirspeedData *airspeed)
     }
 
     airspeed->ground_speed_mps = 0.0f;
-    airspeed->indicated_airspeed_mps = 0.0f;
-    airspeed->indicated_airspeed_kt = 0.0f;
-    airspeed->display_airspeed_kt = 0u;
+    airspeed->true_airspeed_mps = 0.0f;
+    airspeed->true_airspeed_kt = 0.0f;
+    airspeed->display_true_airspeed_kt = 0u;
     airspeed->source = AIRSPEED_SOURCE_NONE;
     airspeed->valid = 0u;
 }
@@ -69,31 +69,31 @@ void AirspeedIndicator_Update(AirspeedData *airspeed,
     source = AIRSPEED_SOURCE_GPS_GROUND_SPEED;
 
     /*
-     * Without a pitot/static differential pressure sensor, this is still an
-     * estimate based on GPS ground speed. Pressure altitude only applies an
-     * ISA density correction so the display behaves closer to an IAS tape.
+     * Without wind data or a pitot/static system, this remains an estimate.
+     * GPS gives ground speed; pressure altitude lets us apply an ISA density
+     * correction for a TAS-style display, while raw GPS remains the fallback.
      */
     if (pressure_altitude_valid != 0u) {
-        target_mps = gps_ground_speed_mps * sqrtf(density_ratio_from_pressure_altitude(pressure_altitude_m));
-        source = AIRSPEED_SOURCE_GPS_PRESSURE_ALTITUDE_ESTIMATE;
+        target_mps = gps_ground_speed_mps / sqrtf(density_ratio_from_pressure_altitude(pressure_altitude_m));
+        source = AIRSPEED_SOURCE_ESTIMATED_TRUE_AIRSPEED;
     }
 
     if (airspeed->valid == 0u) {
         airspeed->ground_speed_mps = gps_ground_speed_mps;
-        airspeed->indicated_airspeed_mps = target_mps;
+        airspeed->true_airspeed_mps = target_mps;
     } else {
         airspeed->ground_speed_mps = AircraftMath_LowPass(airspeed->ground_speed_mps,
                                                           gps_ground_speed_mps,
                                                           dt_s,
                                                           smoothing_tau_s);
-        airspeed->indicated_airspeed_mps = AircraftMath_LowPass(airspeed->indicated_airspeed_mps,
-                                                                target_mps,
-                                                                dt_s,
-                                                                smoothing_tau_s);
+        airspeed->true_airspeed_mps = AircraftMath_LowPass(airspeed->true_airspeed_mps,
+                                                           target_mps,
+                                                           dt_s,
+                                                           smoothing_tau_s);
     }
 
-    airspeed->indicated_airspeed_kt = airspeed->indicated_airspeed_mps * AIRSPEED_MPS_TO_KT;
-    airspeed->display_airspeed_kt = airspeed_to_display_kt(airspeed->indicated_airspeed_kt);
+    airspeed->true_airspeed_kt = airspeed->true_airspeed_mps * AIRSPEED_MPS_TO_KT;
+    airspeed->display_true_airspeed_kt = airspeed_to_display_kt(airspeed->true_airspeed_kt);
     airspeed->source = source;
     airspeed->valid = 1u;
 }

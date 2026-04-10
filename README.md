@@ -126,7 +126,7 @@ aircraft_display->turn_slip.slip_ball;
 aircraft_display->heading.display_heading_deg;
 aircraft_display->altimeter.display_altitude_ft;
 aircraft_display->vsi.vertical_speed_fpm;
-aircraft_display->airspeed.display_airspeed_kt;
+aircraft_display->airspeed.display_true_airspeed_kt;
 ```
 
 The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instruments.c` coordinates the attitude indicator, turn-and-slip, heading card, altimeter, VSI, and airspeed modules without owning their display math.
@@ -140,7 +140,7 @@ The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instru
 - If yaw moves the wrong way, align the AK09916 axes to the accel/gyro frame with `ICM20948_SetMagAxisTransform()`.
 - Set local magnetic declination with `AircraftInstruments_SetDeclination()` if the heading display should show true heading instead of magnetic heading.
 - Set local altimeter pressure with `BMP390_SetSeaLevelPressure()` before converting pressure to altitude.
-- The airspeed indicator needs pitot/static differential pressure for true indicated airspeed. With GPS only, it displays GPS ground speed, optionally ISA-corrected by pressure altitude as an estimate.
+- The airspeed indicator displays true airspeed when it can estimate it from GPS speed plus pressure altitude. With GPS only, it falls back to GPS ground speed.
 - Aircraft use needs independent validation, redundancy, failure annunciation, and compliance work before it can be trusted as flight-critical instrumentation.
 - If AD0 is high on your board, initialize with `ICM20948_ADDR_AD0_HIGH` instead of `ICM20948_ADDR_AD0_LOW`.
 - Link with the math library if your toolchain requires it, usually by adding `-lm`.
