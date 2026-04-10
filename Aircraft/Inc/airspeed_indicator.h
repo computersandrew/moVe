@@ -11,7 +11,8 @@ typedef enum
 {
     AIRSPEED_SOURCE_NONE = 0,
     AIRSPEED_SOURCE_GPS_GROUND_SPEED = 1,
-    AIRSPEED_SOURCE_ESTIMATED_TRUE_AIRSPEED = 2
+    AIRSPEED_SOURCE_ESTIMATED_TRUE_AIRSPEED = 2,
+    AIRSPEED_SOURCE_MEASURED_DENSITY_TRUE_AIRSPEED = 3
 } AirspeedSource;
 
 typedef struct
@@ -35,6 +36,9 @@ void AirspeedIndicator_Update(AirspeedData *airspeed,
                               uint8_t gps_speed_valid,
                               float pressure_altitude_m,
                               uint8_t pressure_altitude_valid,
+                              float static_pressure_pa,
+                              float outside_air_temp_c,
+                              uint8_t air_density_valid,
                               float dt_s,
                               float smoothing_tau_s);
 

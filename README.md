@@ -140,7 +140,7 @@ The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instru
 - If yaw moves the wrong way, align the AK09916 axes to the accel/gyro frame with `ICM20948_SetMagAxisTransform()`.
 - Set local magnetic declination with `AircraftInstruments_SetDeclination()` if the heading display should show true heading instead of magnetic heading.
 - Set local altimeter pressure with `BMP390_SetSeaLevelPressure()` before converting pressure to altitude.
-- The airspeed indicator displays true airspeed when it can estimate it from GPS speed plus pressure altitude. With GPS only, it falls back to GPS ground speed.
+- The airspeed indicator displays estimated true airspeed when it has GPS speed plus BMP390 static pressure and temperature. If temperature or pressure are unavailable, it falls back to pressure-altitude ISA correction, then GPS ground speed.
 - Aircraft use needs independent validation, redundancy, failure annunciation, and compliance work before it can be trusted as flight-critical instrumentation.
 - If AD0 is high on your board, initialize with `ICM20948_ADDR_AD0_HIGH` instead of `ICM20948_ADDR_AD0_LOW`.
 - Link with the math library if your toolchain requires it, usually by adding `-lm`.

@@ -140,9 +140,12 @@ HAL_StatusTypeDef Attitude_Update(void)
         aircraft_input.az_g = sample.az_g;
         aircraft_input.altitude_m = altitude_filter.altitude_m;
         aircraft_input.vertical_speed_mps = altitude_filter.vertical_speed_mps;
+        aircraft_input.static_pressure_pa = baro_sample.pressure_pa;
+        aircraft_input.outside_air_temp_c = baro_sample.temperature_c;
         aircraft_input.gps_ground_speed_mps = gps_sample.ground_speed_mps;
         aircraft_input.mag_valid = sample.mag_data_valid;
         aircraft_input.baro_valid = baro_display_valid;
+        aircraft_input.air_density_valid = baro_display_valid;
         aircraft_input.gps_speed_valid = gps_sample.speed_valid;
 
         AircraftInstruments_Update(&aircraft_instruments, &aircraft_input, dt_s);

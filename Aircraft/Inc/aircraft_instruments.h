@@ -28,9 +28,12 @@ typedef struct
     float az_g;
     float altitude_m;
     float vertical_speed_mps;
+    float static_pressure_pa;
+    float outside_air_temp_c;
     float gps_ground_speed_mps;
     uint8_t mag_valid;
     uint8_t baro_valid;
+    uint8_t air_density_valid;
     uint8_t gps_speed_valid;
 } AircraftInstrumentsInput;
 

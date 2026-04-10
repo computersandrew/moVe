@@ -79,6 +79,9 @@ void AircraftInstruments_Update(AircraftInstruments *inst,
                              input->gps_speed_valid,
                              input->altitude_m,
                              input->baro_valid,
+                             input->static_pressure_pa,
+                             input->outside_air_temp_c,
+                             input->air_density_valid,
                              dt_s,
                              inst->airspeed_smoothing_tau_s);
 }
