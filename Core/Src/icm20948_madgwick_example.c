@@ -1,17 +1,23 @@
 #include "icm20948_madgwick_example.h"
 
+#include "bmp390.h"
 #include "icm20948.h"
+#include "kalman_altitude.h"
 #include "madgwick.h"
 
 extern I2C_HandleTypeDef hi2c1;
 
 static ICM20948_HandleTypeDef imu;
+static BMP390_HandleTypeDef baro;
 static MadgwickAHRS ahrs;
+static KalmanAltitude altitude_filter;
 static uint32_t last_update_ms;
+static uint8_t baro_available;
 
 AttitudeDeg attitude_deg;
 AircraftInstruments aircraft_instruments;
 const AircraftInstrumentsOutput *aircraft_display;
+BMP390_Sample baro_sample;
 
 HAL_StatusTypeDef Attitude_Init(void)
 {
@@ -26,6 +32,21 @@ HAL_StatusTypeDef Attitude_Init(void)
     status = ICM20948_CalibrateGyro(&imu, 300u, 2u);
     if (status != HAL_OK) {
         return status;
+    }
+
+    status = BMP390_Init(&baro, &hi2c1, BMP390_ADDR_I2C_PRIM);
+    if (status == HAL_OK) {
+        baro_available = 1u;
+        HAL_Delay(25u);
+        status = BMP390_Read(&baro, &baro_sample);
+        if ((status == HAL_OK) && (baro_sample.data_ready != 0u)) {
+            KalmanAltitude_Init(&altitude_filter, baro_sample.altitude_m);
+        } else {
+            KalmanAltitude_Init(&altitude_filter, 0.0f);
+        }
+    } else {
+        baro_available = 0u;
+        KalmanAltitude_Init(&altitude_filter, 0.0f);
     }
 
     Madgwick_Init(&ahrs, 200.0f, 0.08f);
@@ -84,6 +105,25 @@ HAL_StatusTypeDef Attitude_Update(void)
 
     {
         AircraftInstrumentsInput aircraft_input;
+        uint8_t baro_display_valid = 0u;
+        uint8_t baro_valid = 0u;
+
+        if (baro_available != 0u) {
+            status = BMP390_Read(&baro, &baro_sample);
+            if (status == HAL_OK) {
+                baro_display_valid = 1u;
+                if (baro_sample.data_ready != 0u) {
+                    baro_valid = 1u;
+                }
+            } else {
+                baro_available = 0u;
+            }
+        }
+
+        KalmanAltitude_Update(&altitude_filter,
+                              baro_sample.altitude_m,
+                              baro_valid,
+                              dt_s);
 
         aircraft_input.roll_deg = attitude_deg.roll_deg;
         aircraft_input.pitch_deg = attitude_deg.pitch_deg;
@@ -94,7 +134,10 @@ HAL_StatusTypeDef Attitude_Update(void)
         aircraft_input.ax_g = sample.ax_g;
         aircraft_input.ay_g = sample.ay_g;
         aircraft_input.az_g = sample.az_g;
+        aircraft_input.altitude_m = altitude_filter.altitude_m;
+        aircraft_input.vertical_speed_mps = altitude_filter.vertical_speed_mps;
         aircraft_input.mag_valid = sample.mag_data_valid;
+        aircraft_input.baro_valid = baro_display_valid;
 
         AircraftInstruments_Update(&aircraft_instruments, &aircraft_input, dt_s);
         aircraft_display = AircraftInstruments_GetOutput(&aircraft_instruments);

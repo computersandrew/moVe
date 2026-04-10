@@ -8,6 +8,7 @@
 #define AIRCRAFT_MAX_PITCH_DEG       90.0f
 #define AIRCRAFT_MAX_TURN_DPS        12.0f
 #define AIRCRAFT_MAX_SLIP_BALL       1.0f
+#define AIRCRAFT_MAX_VSI_FPM         4000.0f
 #define AIRCRAFT_MIN_DT_S            0.001f
 #define AIRCRAFT_MAX_DT_S            0.200f
 
@@ -75,6 +76,15 @@ static uint16_t heading_to_card(float heading_deg)
     return heading;
 }
 
+static int32_t altitude_to_display_ft(float altitude_ft)
+{
+    if (altitude_ft >= 0.0f) {
+        return (int32_t)(altitude_ft + 0.5f);
+    }
+
+    return (int32_t)(altitude_ft - 0.5f);
+}
+
 void AircraftInstruments_Init(AircraftInstruments *inst,
                               float magnetic_declination_deg)
 {
@@ -84,6 +94,8 @@ void AircraftInstruments_Init(AircraftInstruments *inst,
 
     inst->magnetic_declination_deg = magnetic_declination_deg;
     inst->smoothing_tau_s = AIRCRAFT_DEFAULT_TAU_S;
+    inst->altitude_smoothing_tau_s = 0.35f;
+    inst->vsi_smoothing_tau_s = 0.75f;
     inst->output.attitude.roll_deg = 0.0f;
     inst->output.attitude.pitch_deg = 0.0f;
     inst->output.attitude.bank_pointer_deg = 0.0f;
@@ -96,7 +108,16 @@ void AircraftInstruments_Init(AircraftInstruments *inst,
     inst->output.heading.true_heading_deg = normalize_360(magnetic_declination_deg);
     inst->output.heading.display_heading_deg = heading_to_card(inst->output.heading.true_heading_deg);
     inst->output.heading.magnetic_valid = 0u;
+    inst->output.altimeter.altitude_m = 0.0f;
+    inst->output.altimeter.altitude_ft = 0.0f;
+    inst->output.altimeter.display_altitude_ft = 0;
+    inst->output.altimeter.valid = 0u;
+    inst->output.vsi.vertical_speed_mps = 0.0f;
+    inst->output.vsi.vertical_speed_fpm = 0.0f;
+    inst->output.vsi.needle_fpm = 0.0f;
+    inst->output.vsi.valid = 0u;
     inst->initialized = 0u;
+    inst->altitude_initialized = 0u;
 }
 
 void AircraftInstruments_SetDeclination(AircraftInstruments *inst,
@@ -119,6 +140,8 @@ void AircraftInstruments_Update(AircraftInstruments *inst,
     float slip_ball;
     float magnetic_heading;
     float true_heading;
+    float altitude_ft;
+    float vsi_fpm;
 
     if ((inst == NULL) || (input == NULL)) {
         return;
@@ -138,6 +161,8 @@ void AircraftInstruments_Update(AircraftInstruments *inst,
 
     magnetic_heading = normalize_360(input->yaw_deg);
     true_heading = normalize_360(magnetic_heading + inst->magnetic_declination_deg);
+    altitude_ft = input->altitude_m * AIRCRAFT_M_TO_FT;
+    vsi_fpm = input->vertical_speed_mps * AIRCRAFT_MPS_TO_FPM;
 
     if (inst->initialized == 0u) {
         inst->output.attitude.roll_deg = roll;
@@ -189,6 +214,49 @@ void AircraftInstruments_Update(AircraftInstruments *inst,
     inst->output.turn_slip.valid = 1u;
     inst->output.heading.magnetic_valid = input->mag_valid;
     inst->output.heading.display_heading_deg = heading_to_card(inst->output.heading.true_heading_deg);
+
+    if (input->baro_valid != 0u) {
+        if (inst->altitude_initialized == 0u) {
+            inst->output.altimeter.altitude_m = input->altitude_m;
+            inst->output.altimeter.altitude_ft = altitude_ft;
+            inst->output.vsi.vertical_speed_mps = input->vertical_speed_mps;
+            inst->output.vsi.vertical_speed_fpm = vsi_fpm;
+            inst->altitude_initialized = 1u;
+        } else {
+            inst->output.altimeter.altitude_m =
+                low_pass(inst->output.altimeter.altitude_m,
+                         input->altitude_m,
+                         dt_s,
+                         inst->altitude_smoothing_tau_s);
+            inst->output.altimeter.altitude_ft =
+                low_pass(inst->output.altimeter.altitude_ft,
+                         altitude_ft,
+                         dt_s,
+                         inst->altitude_smoothing_tau_s);
+            inst->output.vsi.vertical_speed_mps =
+                low_pass(inst->output.vsi.vertical_speed_mps,
+                         input->vertical_speed_mps,
+                         dt_s,
+                         inst->vsi_smoothing_tau_s);
+            inst->output.vsi.vertical_speed_fpm =
+                low_pass(inst->output.vsi.vertical_speed_fpm,
+                         vsi_fpm,
+                         dt_s,
+                         inst->vsi_smoothing_tau_s);
+        }
+
+        inst->output.altimeter.display_altitude_ft =
+            altitude_to_display_ft(inst->output.altimeter.altitude_ft);
+        inst->output.altimeter.valid = 1u;
+        inst->output.vsi.needle_fpm =
+            clampf_local(inst->output.vsi.vertical_speed_fpm,
+                         -AIRCRAFT_MAX_VSI_FPM,
+                         AIRCRAFT_MAX_VSI_FPM);
+        inst->output.vsi.valid = 1u;
+    } else {
+        inst->output.altimeter.valid = 0u;
+        inst->output.vsi.valid = 0u;
+    }
 }
 
 const AircraftInstrumentsOutput *AircraftInstruments_GetOutput(const AircraftInstruments *inst)

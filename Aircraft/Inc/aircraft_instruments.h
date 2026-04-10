@@ -8,6 +8,8 @@ extern "C" {
 #endif
 
 #define AIRCRAFT_STANDARD_RATE_TURN_DPS    3.0f
+#define AIRCRAFT_M_TO_FT                   3.280839895f
+#define AIRCRAFT_MPS_TO_FPM                196.8503937f
 
 typedef struct
 {
@@ -20,7 +22,10 @@ typedef struct
     float ax_g;
     float ay_g;
     float az_g;
+    float altitude_m;
+    float vertical_speed_mps;
     uint8_t mag_valid;
+    uint8_t baro_valid;
 } AircraftInstrumentsInput;
 
 typedef struct
@@ -49,17 +54,38 @@ typedef struct
 
 typedef struct
 {
+    float altitude_m;
+    float altitude_ft;
+    int32_t display_altitude_ft;
+    uint8_t valid;
+} AltimeterData;
+
+typedef struct
+{
+    float vertical_speed_mps;
+    float vertical_speed_fpm;
+    float needle_fpm;
+    uint8_t valid;
+} VerticalSpeedData;
+
+typedef struct
+{
     AttitudeIndicatorData attitude;
     TurnSlipData turn_slip;
     HeadingData heading;
+    AltimeterData altimeter;
+    VerticalSpeedData vsi;
 } AircraftInstrumentsOutput;
 
 typedef struct
 {
     float magnetic_declination_deg;
     float smoothing_tau_s;
+    float altitude_smoothing_tau_s;
+    float vsi_smoothing_tau_s;
     AircraftInstrumentsOutput output;
     uint8_t initialized;
+    uint8_t altitude_initialized;
 } AircraftInstruments;
 
 void AircraftInstruments_Init(AircraftInstruments *inst,

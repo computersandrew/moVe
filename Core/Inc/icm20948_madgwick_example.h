@@ -3,6 +3,7 @@
 
 #include "icm20948.h"
 #include "aircraft_instruments.h"
+#include "bmp390.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,6 +19,7 @@ typedef struct
 extern AttitudeDeg attitude_deg;
 extern AircraftInstruments aircraft_instruments;
 extern const AircraftInstrumentsOutput *aircraft_display;
+extern BMP390_Sample baro_sample;
 
 HAL_StatusTypeDef Attitude_Init(void);
 HAL_StatusTypeDef Attitude_Update(void);

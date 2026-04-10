@@ -25,6 +25,9 @@ This is a plain C STM32 HAL implementation for:
 - BMP390 by Bosch 
 - I2C, SPI capabilities
 - Also, temperature capabilities 
+- Compensated pressure and temperature over I2C.
+- Pressure altitude conversion with configurable sea-level pressure.
+- Two-state Kalman filter for altitude and vertical speed.
 
 ## U-Blox MAX-M10S for STM32H7
 
@@ -55,6 +58,10 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Src/madgwick.c`
 - `Core/Inc/icm20948_madgwick_example.h`
 - `Core/Src/icm20948_madgwick_example.c`
+- `Core/Inc/bmp390.h`
+- `Core/Src/bmp390.c`
+- `Core/Inc/kalman_altitude.h`
+- `Core/Src/kalman_altitude.c`
 - `Aircraft/Inc/aircraft_instruments.h`
 - `Aircraft/Src/aircraft_instruments.c`
 
@@ -99,9 +106,11 @@ aircraft_display->turn_slip.turn_rate_deg_s;
 aircraft_display->turn_slip.standard_rate_fraction;
 aircraft_display->turn_slip.slip_ball;
 aircraft_display->heading.display_heading_deg;
+aircraft_display->altimeter.display_altitude_ft;
+aircraft_display->vsi.vertical_speed_fpm;
 ```
 
-`Aircraft/Src/aircraft_instruments.c` is intentionally separate from the IMU and filter code. It is the display adapter for an attitude indicator, turn-and-slip, and heading card.
+`Aircraft/Src/aircraft_instruments.c` is intentionally separate from the IMU, barometer, and filter code. It is the display adapter for an attitude indicator, turn-and-slip, heading card, altimeter, and VSI.
 
 ## Notes
 
@@ -111,6 +120,7 @@ aircraft_display->heading.display_heading_deg;
 - Real yaw quality depends heavily on magnetometer hard-iron and soft-iron calibration. Use `ICM20948_SetMagCalibration()` after you measure your board's calibration values.
 - If yaw moves the wrong way, align the AK09916 axes to the accel/gyro frame with `ICM20948_SetMagAxisTransform()`.
 - Set local magnetic declination with `AircraftInstruments_SetDeclination()` if the heading display should show true heading instead of magnetic heading.
+- Set local altimeter pressure with `BMP390_SetSeaLevelPressure()` before converting pressure to altitude.
 - Aircraft use needs independent validation, redundancy, failure annunciation, and compliance work before it can be trusted as flight-critical instrumentation.
 - If AD0 is high on your board, initialize with `ICM20948_ADDR_AD0_HIGH` instead of `ICM20948_ADDR_AD0_LOW`.
 - Link with the math library if your toolchain requires it, usually by adding `-lm`.
