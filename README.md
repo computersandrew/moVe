@@ -4,6 +4,8 @@ High-performance (ish) STM32H7 sensor suite and navigation platform for autonomo
 
 To include a header for possible 3.3V Lithium Ion Cells
 
+PCA9306 Level Shifter(s)
+
 This is a plain C STM32 HAL implementation for:
 
 ## ICM-20948 + Madgwick AHRS for STM32H7
@@ -31,6 +33,19 @@ This is a plain C STM32 HAL implementation for:
 - moving map/navigation
 - Outputs MSL elevation data, Ground Speed, Lat/Long Coordinates
 - Will include uFL connector, as well as ceramic patch antenna by default
+
+
+## Parts List
+
+- STM32H7
+- U-Blox M10S
+- ICM-20948
+- BMP390
+- PCA9306 Level Shifter(s)
+- MIC5225
+- USB-C Connector (5V 500mA)
+- SD Card Reader
+- 
 
 ## Files (so far) will update
 
