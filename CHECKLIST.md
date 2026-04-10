@@ -16,9 +16,11 @@
 - [ ] Configure system clock.
 - [ ] Configure I2C for ICM-20948 and BMP390.
 - [ ] Configure UART for MAX-M10S.
+- [ ] Configure UART for nRF52840 Bluetooth link.
 - [ ] Configure display interface.
 - [ ] Configure debug UART or SWO logging.
 - [ ] Confirm all GPIO alternate functions.
+- [ ] Cross-check CubeMX pins against `docs/pinout.md`.
 
 ## ICM-20948 AHRS
 
@@ -55,6 +57,21 @@
 - [ ] Configure navigation update rate.
 - [ ] Add UART DMA or idle-line receive path.
 - [ ] Add GPS no-fix and stale-data flags.
+
+## nRF52840 Bluetooth
+
+- [ ] Decide nRF52840 chip vs module.
+- [ ] Choose antenna type: PCB antenna, chip antenna, or u.FL.
+- [ ] Add nRF reset line from STM32.
+- [ ] Add nRF DFU/boot control from STM32 or test pad.
+- [ ] Add nRF IRQ/attention line to STM32.
+- [ ] Decide whether UART RTS/CTS flow control is needed.
+- [ ] Add nRF SWD programming/debug header.
+- [ ] Add 32 MHz crystal and matching components if using bare nRF52840.
+- [ ] Add 32.768 kHz crystal if low-power BLE timing is needed.
+- [ ] Define STM32-to-nRF host protocol.
+- [ ] Add STM32 UART driver for nRF host messages.
+- [ ] Add nRF firmware project or select a Nordic connectivity firmware path.
 
 ## Aircraft Instruments
 
@@ -121,6 +138,10 @@
 
 ## Hardware Validation
 
+- [ ] Review custom KiCad schematic against `docs/pinout.md`.
+- [ ] Run ERC and DRC in KiCad.
+- [ ] Review STM32H745ZI power, decoupling, VCAP, BOOT0, and reset circuits.
+- [ ] Review nRF52840 RF layout and antenna keepout.
 - [ ] Confirm I2C pull-ups and voltage domains.
 - [ ] Confirm PCA9306 level shifter behavior.
 - [ ] Confirm GPS antenna path.

@@ -1,12 +1,19 @@
 # moVe
 
-High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, and u-blox M10 GNSS. Will include an option for Non-Volatile Storage for Datalogging and USB. Will debate the 802.11ac/Bluetooth 4.0 LE implementation.
+High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, u-blox M10 GNSS, and nRF52840 Bluetooth LE. Will include an option for non-volatile storage for datalogging and USB.
 
 To include a header for possible 3.3V Lithium Ion Cells
 
 PCA9306 Level Shifter(s)
 
 This is a plain C STM32 HAL implementation for:
+
+## Custom Board
+
+- Main MCU: STM32H745ZI.
+- Designed as a custom single board in KiCad.
+- Initial pinout draft: `docs/pinout.md`.
+- nRF52840 Bluetooth LE co-processor on a UART host link, with reset/DFU/debug lines reserved.
 
 ## ICM-20948 + Madgwick AHRS for STM32H7
 [Datasheet](https://d17t6iyxenbwp1.cloudfront.net/s3fs-public/2026-01/DS-000189-ICM-20948-v1.6.pdf?VersionId=XteIUeEiGGKWJDQjSzr3D2K3OIitFvHY)
@@ -39,18 +46,31 @@ This is a plain C STM32 HAL implementation for:
 - Parses both UBX binary navigation messages and NMEA sentences.
 - GPS ground speed feeds the airspeed display as a fallback speed source.
 
+## nRF52840 Bluetooth LE Co-Processor
+
+- To run on 3.3V bus.
+- Host interface starts as UART from STM32H745ZI to nRF52840.
+- Optional RTS/CTS hardware flow control should be reserved in the schematic.
+- Include nRF reset, DFU/boot, IRQ, and separate SWD debug access.
+- RF layout should follow Nordic guidance with antenna keepout and matching network.
 
 ## Parts List
 
-- STM32H7
-- U-Blox M10S
-- ICM-20948
-- BMP390
-- PCA9306 Level Shifter(s)
-- MIC5225
+- STM32H745ZI MCU
+- nRF52840 Bluetooth LE SoC or module
+- U-Blox MAX-M10S GNSS receiver
+- ICM-20948 9-axis IMU
+- BMP390 pressure/temperature sensor
+- PCA9306 level shifter(s), if mixed-voltage I2C is kept
+- MIC5225 or equivalent low-noise LDO for 1.8 V rail
+- 3.3 V regulator sized for STM32, GNSS, nRF52840, SD, and display
 - USB-C Connector (5V 500mA)
-- SD Card Reader
-- 
+- SD card socket
+- GNSS antenna path: u.FL and/or ceramic patch antenna
+- nRF52840 antenna path: chip antenna, PCB antenna, or u.FL with matching network
+- STM32 SWD header
+- nRF52840 SWD header
+- Reset and boot/DFU buttons or test pads
 
 ## Files (so far) will update
 
@@ -63,6 +83,7 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Inc/navigation_fusion.h`
 - `Core/Src/navigation_fusion.c`
 - `Core/Src/main.c`
+- `docs/pinout.md`
 - `Core/Inc/bmp390.h`
 - `Core/Src/bmp390.c`
 - `Core/Inc/kalman_altitude.h`
