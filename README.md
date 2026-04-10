@@ -1,6 +1,6 @@
 # moVe
 
-High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, u-blox M10 GNSS, and nRF52840 Bluetooth LE. Will include an option for non-volatile storage for datalogging and USB.
+High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, u-blox M10 GNSS, nRF52840 Bluetooth LE, and an RGB TFT cockpit display path. Will include non-volatile storage for datalogging, map/chart assets, and USB.
 
 To include a header for possible 3.3V Lithium Ion Cells
 
@@ -10,10 +10,12 @@ This is a plain C STM32 HAL implementation for:
 
 ## Custom Board
 
-- Main MCU: STM32H745ZI.
+- Main MCU: STM32H723ZGT6.
 - Designed as a custom single board in KiCad.
 - Initial pinout draft: `docs/pinout.md`.
 - nRF52840 Bluetooth LE co-processor on a UART host link, with reset/DFU/debug lines reserved.
+- Display direction: Newhaven `NHD-5.0-800480TF-ATXL-CTP`, driven with LTDC RGB, DMA2D, and external SDRAM.
+- Storage direction: `SDMMC2` microSD in 4-bit mode for logs and chart/map tiles.
 
 ## ICM-20948 + Madgwick AHRS for STM32H7
 [Datasheet](https://d17t6iyxenbwp1.cloudfront.net/s3fs-public/2026-01/DS-000189-ICM-20948-v1.6.pdf?VersionId=XteIUeEiGGKWJDQjSzr3D2K3OIitFvHY)
@@ -49,23 +51,39 @@ This is a plain C STM32 HAL implementation for:
 ## nRF52840 Bluetooth LE Co-Processor
 
 - To run on 3.3V bus.
-- Host interface starts as UART from STM32H745ZI to nRF52840.
+- Host interface starts as asynchronous UART from STM32H723ZGT6 to nRF52840.
 - Optional RTS/CTS hardware flow control should be reserved in the schematic.
 - Include nRF reset, DFU/boot, IRQ, and separate SWD debug access.
 - RF layout should follow Nordic guidance with antenna keepout and matching network.
 
+## Graphical Display Path
+
+- Newhaven `NHD-5.0-800480TF-ATXL-CTP` 5 inch, 800x480 RGB TFT with capacitive touch.
+- STM32 `LTDC` drives the parallel RGB display interface.
+- STM32 `DMA2D` accelerates fills, blits, and pixel format conversion.
+- External SDRAM on `FMC SDRAM 1` holds the framebuffer; start with a 16-bit SDRAM bus.
+- Use `RGB565` for the first framebuffer format even though the physical panel interface is RGB888.
+- Touch uses I2C plus touch interrupt/reset GPIOs.
+- Backlight needs a separate LED boost/current driver, not a direct STM32 GPIO.
+- FAA sectionals/charts should be preprocessed into raster tiles and loaded from SD instead of rendering full PDFs on the MCU.
+
 ## Parts List
 
-- STM32H745ZI MCU
+- STM32H723ZGT6 MCU
 - nRF52840 Bluetooth LE SoC or module
 - U-Blox MAX-M10S GNSS receiver
 - ICM-20948 9-axis IMU
 - BMP390 pressure/temperature sensor
+- Newhaven `NHD-5.0-800480TF-ATXL-CTP` RGB TFT with capacitive touch
+- 16-bit external SDRAM for framebuffer storage
+- Backlight LED boost/current driver for the TFT
 - PCA9306 level shifter(s), if mixed-voltage I2C is kept
 - MIC5225 or equivalent low-noise LDO for 1.8 V rail
 - 3.3 V regulator sized for STM32, GNSS, nRF52840, SD, and display
 - USB-C Connector (5V 500mA)
 - SD card socket
+- Optional battery connector and protected 2-cell input path
+- ADC battery-sense divider and optional current-sense amplifier
 - GNSS antenna path: u.FL and/or ceramic patch antenna
 - nRF52840 antenna path: chip antenna, PCB antenna, or u.FL with matching network
 - STM32 SWD header
@@ -115,7 +133,7 @@ Copy the `Core/Inc`, `Core/Src`, `Aircraft/Inc`, and `Aircraft/Src` files into y
 extern I2C_HandleTypeDef hi2c1;
 ```
 
-The Cube-style entry point is `Core/Src/main.c`. It shows the expected HAL init order, starts GPS UART byte reception, and calls the navigation fusion update loop.
+The Cube-style entry point is `Core/Src/main.c`. It shows the expected HAL init order for the H723 board direction, including I2C sensors, GPS UART, nRF UART, ADC battery sense, FMC SDRAM, DMA2D, LTDC, SDMMC2, USB device, GPS UART byte reception, and the navigation fusion update loop.
 
 Legacy compatibility wrappers are still available. Call this once after `MX_I2C1_Init()`:
 

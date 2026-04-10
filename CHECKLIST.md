@@ -7,18 +7,29 @@
 - [x] Keep legacy `Attitude_Init()` / `Attitude_Update()` wrappers for compatibility.
 - [x] Add Cube-style `main.c` skeleton.
 - [ ] Replace skeleton declarations with STM32CubeMX-generated files.
-- [ ] Decide bare-metal scheduler vs FreeRTOS.
+- [x] Decide initial scheduler stance: bare-metal/superloop for first bring-up, FreeRTOS later.
 - [ ] Add module-level fault/status outputs.
 
 ## STM32CubeMX Bring-Up
 
-- [ ] Create `.ioc` project for the target STM32H7.
+- [ ] Create `.ioc` project for `STM32H723ZGT6`.
 - [ ] Configure system clock.
 - [ ] Configure I2C for ICM-20948 and BMP390.
-- [ ] Configure UART for MAX-M10S.
-- [ ] Configure UART for nRF52840 Bluetooth link.
-- [ ] Configure display interface.
+- [ ] Configure `USART1` asynchronous UART for MAX-M10S.
+- [ ] Configure `USART3` asynchronous UART for nRF52840 Bluetooth link.
+- [ ] Configure `USB_OTG_HS` as `Device_Only` using embedded FS PHY unless an external ULPI PHY is added.
+- [ ] Disable USB VBUS sensing for first bring-up or route a safe divided sense option for later.
+- [ ] Configure `ADC1` battery voltage sense pin.
+- [ ] Configure `LTDC` for the Newhaven RGB TFT display.
+- [ ] Configure `DMA2D` for GUI acceleration.
+- [ ] Configure `FMC` `SDRAM 1` with `SDCKE0 + SDNE0`, 16-bit data, and SDRAM-part-specific timing.
+- [ ] Configure `SDMMC2` in `SD 4 bits Wide bus` mode without auto-direction voltage converter.
+- [ ] Enable `CRC`.
+- [ ] Decide whether to enable `RNG`.
+- [ ] Leave `DFSDM1`, `I2S`, `SAI`, `DCMI`, and `PWR Wake-Up 1` disabled unless a later feature needs them.
+- [ ] Leave FreeRTOS disabled for first hardware bring-up.
 - [ ] Configure debug UART or SWO logging.
+- [ ] Configure `DEBUG` / `SYS` as `Serial Wire`.
 - [ ] Confirm all GPIO alternate functions.
 - [ ] Cross-check CubeMX pins against `docs/pinout.md`.
 
@@ -97,19 +108,29 @@
 
 ## Display
 
-- [ ] Select display hardware and interface.
+- [x] Select initial display hardware direction: Newhaven `NHD-5.0-800480TF-ATXL-CTP`.
+- [x] Select initial display interface direction: `LTDC` parallel RGB, not SPI.
+- [ ] Select exact LTDC color-depth wiring after resolving CubeMX pin conflicts.
+- [ ] Add external SDRAM part for framebuffer storage.
+- [ ] Add TFT backlight LED boost/current driver.
+- [ ] Add capacitive touch I2C, reset, and interrupt wiring.
+- [ ] Implement SDRAM initialization and linker/MPU placement.
+- [ ] Implement LTDC test pattern.
+- [ ] Implement DMA2D framebuffer clear/blit path.
 - [ ] Implement attitude indicator rendering.
 - [ ] Implement turn/slip rendering.
 - [ ] Implement heading card rendering.
 - [ ] Implement altimeter rendering.
 - [ ] Implement VSI rendering.
 - [ ] Implement TAS/GS airspeed rendering.
+- [ ] Implement moving-map tile loader from SD.
+- [ ] Define chart tile preprocessing format for FAA sectionals/charts.
 - [ ] Add invalid-data annunciations.
 - [ ] Add display refresh scheduler.
 
 ## Storage And Configuration
 
-- [ ] Decide non-volatile storage: internal flash, EEPROM, FRAM, or SD.
+- [x] Decide initial bulk storage: SD card via `SDMMC2`.
 - [ ] Store magnetometer calibration.
 - [ ] Store gyro/accelerometer calibration.
 - [ ] Store altimeter setting.
@@ -140,7 +161,12 @@
 
 - [ ] Review custom KiCad schematic against `docs/pinout.md`.
 - [ ] Run ERC and DRC in KiCad.
-- [ ] Review STM32H745ZI power, decoupling, VCAP, BOOT0, and reset circuits.
+- [ ] Review STM32H723ZGT6 power, decoupling, VCAP, BOOT0, and reset circuits.
+- [ ] Review USB-C VBUS power path, CC pulldowns, ESD, fuse/eFuse, and regulator input ratings.
+- [ ] Review battery input protection, battery-sense divider, and optional current sensing if battery connector is added.
+- [ ] Review SDRAM routing, address/control/data fanout, and timing constraints.
+- [ ] Review LTDC RGB routing, pixel clock, HSYNC, VSYNC, DE, and display connector pinout.
+- [ ] Review TFT backlight boost/current driver and LED return path.
 - [ ] Review nRF52840 RF layout and antenna keepout.
 - [ ] Confirm I2C pull-ups and voltage domains.
 - [ ] Confirm PCA9306 level shifter behavior.
