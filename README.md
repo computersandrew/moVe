@@ -1,4 +1,8 @@
-# ICM-20948 + Madgwick AHRS for STM32H7
+# moVe
+
+High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, and u-blox M10 GNSS.
+
+## ICM-20948 + Madgwick AHRS for STM32H7
 
 This is a plain C STM32 HAL implementation for:
 
@@ -20,7 +24,7 @@ This is a plain C STM32 HAL implementation for:
 
 ## STM32CubeIDE Use
 
-Copy the `Core/Inc` files into your STM32H7 project include path and the `Core/Src` files into your source folder. Enable I2C in CubeMX, then make sure the example uses the matching handle:
+Copy the `Core/Inc`, `Core/Src`, `Aircraft/Inc`, and `Aircraft/Src` files into your STM32H7 project. Enable I2C in CubeMX, then make sure the example uses the matching handle:
 
 ```c
 extern I2C_HandleTypeDef hi2c1;
