@@ -1,17 +1,33 @@
 # moVe
 
-High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, and u-blox M10 GNSS.
-
-## ICM-20948 + Madgwick AHRS for STM32H7
+High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, and u-blox M10 GNSS. Will include an option for Non-Volatile Storage for Datalogging and USB. Will debate 802.11ac/Bluetooth 4.0LE implementation
 
 This is a plain C STM32 HAL implementation for:
 
-- ICM-20948 accelerometer and gyroscope over I2C.
-- Embedded AK09916 magnetometer through ICM-20948 bypass mode.
-- Madgwick 6-axis or 9-axis attitude filtering.
-- Roll, pitch, yaw, and aircraft-display-ready instrument values.
+## ICM-20948 + Madgwick AHRS for STM32H7
+[Datasheet](https://d17t6iyxenbwp1.cloudfront.net/s3fs-public/2026-01/DS-000189-ICM-20948-v1.6.pdf?VersionId=XteIUeEiGGKWJDQjSzr3D2K3OIitFvHY)
 
-## Files
+- To run on 3.3V Bus
+- ICM-20948 by InvenSense TDK
+- ICM-20948 accelerometer and gyroscope over I2C. 
+- ICM-20948 contains the AK09916 magnetometer (allegedly according to adafruit) through ICM-20948 bypass mode.
+- Madgwick 6-axis or 9-axis attitude filtering.
+- Roll, pitch, yaw, and aircraft/drone display ready instrument values.
+- Roll/Pitch applications for marine use
+
+## BMP390 + Simple Kalman Filtering for STM32H7
+[Datasheet](https://www.mouser.com/datasheet/3/1046/1/bst_bmp390_ds002.pdf)
+- To run on 3.3V Bus
+- BMP390 by Bosch 
+- I2C, SPI capabilities
+- Also, temperature capabilities 
+
+## u-blox m10 (version tbd) for STM32H7
+- moving map/navigation
+- Outputs MSL elevation data, Ground Speed, Lat/Long Coordinates
+- To run on 5V Bus?
+
+## Files (so far) will update
 
 - `Core/Inc/icm20948.h`
 - `Core/Src/icm20948.c`
