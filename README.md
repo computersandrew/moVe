@@ -36,6 +36,8 @@ This is a plain C STM32 HAL implementation for:
 - moving map/navigation
 - Outputs MSL elevation data, Ground Speed, Lat/Long Coordinates
 - Will include uFL connector, as well as ceramic patch antenna by default
+- Parses both UBX binary navigation messages and NMEA sentences.
+- GPS ground speed feeds the airspeed display as a fallback speed source.
 
 
 ## Parts List
@@ -62,6 +64,8 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Src/bmp390.c`
 - `Core/Inc/kalman_altitude.h`
 - `Core/Src/kalman_altitude.c`
+- `Core/Inc/max_m10s.h`
+- `Core/Src/max_m10s.c`
 - `Aircraft/Inc/aircraft_instruments.h`
 - `Aircraft/Src/aircraft_instruments.c`
 - `Aircraft/Inc/attitude_indicator.h`
@@ -72,6 +76,8 @@ This is a plain C STM32 HAL implementation for:
 - `Aircraft/Src/heading_indicator.c`
 - `Aircraft/Inc/altimeter.h`
 - `Aircraft/Src/altimeter.c`
+- `Aircraft/Inc/airspeed_indicator.h`
+- `Aircraft/Src/airspeed_indicator.c`
 - `Aircraft/Inc/vertical_speed_indicator.h`
 - `Aircraft/Src/vertical_speed_indicator.c`
 - `Aircraft/Inc/aircraft_math.h`
@@ -120,9 +126,10 @@ aircraft_display->turn_slip.slip_ball;
 aircraft_display->heading.display_heading_deg;
 aircraft_display->altimeter.display_altitude_ft;
 aircraft_display->vsi.vertical_speed_fpm;
+aircraft_display->airspeed.display_airspeed_kt;
 ```
 
-The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instruments.c` coordinates the attitude indicator, turn-and-slip, heading card, altimeter, and VSI modules without owning their display math.
+The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instruments.c` coordinates the attitude indicator, turn-and-slip, heading card, altimeter, VSI, and airspeed modules without owning their display math.
 
 ## Notes
 
@@ -133,6 +140,7 @@ The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instru
 - If yaw moves the wrong way, align the AK09916 axes to the accel/gyro frame with `ICM20948_SetMagAxisTransform()`.
 - Set local magnetic declination with `AircraftInstruments_SetDeclination()` if the heading display should show true heading instead of magnetic heading.
 - Set local altimeter pressure with `BMP390_SetSeaLevelPressure()` before converting pressure to altitude.
+- The airspeed indicator needs pitot/static differential pressure for true indicated airspeed. With GPS only, it displays GPS ground speed, optionally ISA-corrected by pressure altitude as an estimate.
 - Aircraft use needs independent validation, redundancy, failure annunciation, and compliance work before it can be trusted as flight-critical instrumentation.
 - If AD0 is high on your board, initialize with `ICM20948_ADDR_AD0_HIGH` instead of `ICM20948_ADDR_AD0_LOW`.
 - Link with the math library if your toolchain requires it, usually by adding `-lm`.

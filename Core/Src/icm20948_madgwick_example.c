@@ -3,12 +3,14 @@
 #include "bmp390.h"
 #include "icm20948.h"
 #include "kalman_altitude.h"
+#include "max_m10s.h"
 #include "madgwick.h"
 
 extern I2C_HandleTypeDef hi2c1;
 
 static ICM20948_HandleTypeDef imu;
 static BMP390_HandleTypeDef baro;
+static MAXM10S_Parser gps_parser;
 static MadgwickAHRS ahrs;
 static KalmanAltitude altitude_filter;
 static uint32_t last_update_ms;
@@ -18,6 +20,7 @@ AttitudeDeg attitude_deg;
 AircraftInstruments aircraft_instruments;
 const AircraftInstrumentsOutput *aircraft_display;
 BMP390_Sample baro_sample;
+MAXM10S_NavSample gps_sample;
 
 HAL_StatusTypeDef Attitude_Init(void)
 {
@@ -50,6 +53,7 @@ HAL_StatusTypeDef Attitude_Init(void)
     }
 
     Madgwick_Init(&ahrs, 200.0f, 0.08f);
+    MAXM10S_Init(&gps_parser);
     AircraftInstruments_Init(&aircraft_instruments, 0.0f);
     aircraft_display = AircraftInstruments_GetOutput(&aircraft_instruments);
     last_update_ms = HAL_GetTick();
@@ -136,12 +140,24 @@ HAL_StatusTypeDef Attitude_Update(void)
         aircraft_input.az_g = sample.az_g;
         aircraft_input.altitude_m = altitude_filter.altitude_m;
         aircraft_input.vertical_speed_mps = altitude_filter.vertical_speed_mps;
+        aircraft_input.gps_ground_speed_mps = gps_sample.ground_speed_mps;
         aircraft_input.mag_valid = sample.mag_data_valid;
         aircraft_input.baro_valid = baro_display_valid;
+        aircraft_input.gps_speed_valid = gps_sample.speed_valid;
 
         AircraftInstruments_Update(&aircraft_instruments, &aircraft_input, dt_s);
         aircraft_display = AircraftInstruments_GetOutput(&aircraft_instruments);
     }
 
     return HAL_OK;
+}
+
+void Navigation_GpsProcessByte(uint8_t byte)
+{
+    (void)MAXM10S_ProcessByte(&gps_parser, byte, &gps_sample);
+}
+
+void Navigation_GpsProcessBuffer(const uint8_t *data, uint16_t length)
+{
+    (void)MAXM10S_ProcessBuffer(&gps_parser, data, length, &gps_sample);
 }

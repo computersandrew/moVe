@@ -4,6 +4,7 @@
 #include "altimeter.h"
 #include "attitude_indicator.h"
 #include "aircraft_math.h"
+#include "airspeed_indicator.h"
 #include "heading_indicator.h"
 #include "turn_slip.h"
 #include "vertical_speed_indicator.h"
@@ -27,8 +28,10 @@ typedef struct
     float az_g;
     float altitude_m;
     float vertical_speed_mps;
+    float gps_ground_speed_mps;
     uint8_t mag_valid;
     uint8_t baro_valid;
+    uint8_t gps_speed_valid;
 } AircraftInstrumentsInput;
 
 typedef struct
@@ -38,6 +41,7 @@ typedef struct
     HeadingData heading;
     AltimeterData altimeter;
     VerticalSpeedData vsi;
+    AirspeedData airspeed;
 } AircraftInstrumentsOutput;
 
 typedef struct
@@ -46,6 +50,7 @@ typedef struct
     float smoothing_tau_s;
     float altitude_smoothing_tau_s;
     float vsi_smoothing_tau_s;
+    float airspeed_smoothing_tau_s;
     AircraftInstrumentsOutput output;
 } AircraftInstruments;
 

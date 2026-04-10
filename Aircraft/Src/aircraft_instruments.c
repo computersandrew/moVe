@@ -15,12 +15,14 @@ void AircraftInstruments_Init(AircraftInstruments *inst,
     inst->smoothing_tau_s = AIRCRAFT_DEFAULT_TAU_S;
     inst->altitude_smoothing_tau_s = 0.35f;
     inst->vsi_smoothing_tau_s = 0.75f;
+    inst->airspeed_smoothing_tau_s = 0.45f;
 
     AttitudeIndicator_Init(&inst->output.attitude);
     TurnSlip_Init(&inst->output.turn_slip);
     HeadingIndicator_Init(&inst->output.heading, magnetic_declination_deg);
     Altimeter_Init(&inst->output.altimeter);
     VerticalSpeedIndicator_Init(&inst->output.vsi);
+    AirspeedIndicator_Init(&inst->output.airspeed);
 }
 
 void AircraftInstruments_SetDeclination(AircraftInstruments *inst,
@@ -71,6 +73,14 @@ void AircraftInstruments_Update(AircraftInstruments *inst,
                                   input->baro_valid,
                                   dt_s,
                                   inst->vsi_smoothing_tau_s);
+
+    AirspeedIndicator_Update(&inst->output.airspeed,
+                             input->gps_ground_speed_mps,
+                             input->gps_speed_valid,
+                             input->altitude_m,
+                             input->baro_valid,
+                             dt_s,
+                             inst->airspeed_smoothing_tau_s);
 }
 
 const AircraftInstrumentsOutput *AircraftInstruments_GetOutput(const AircraftInstruments *inst)
