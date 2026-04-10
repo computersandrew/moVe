@@ -60,6 +60,9 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Src/madgwick.c`
 - `Core/Inc/icm20948_madgwick_example.h`
 - `Core/Src/icm20948_madgwick_example.c`
+- `Core/Inc/navigation_fusion.h`
+- `Core/Src/navigation_fusion.c`
+- `Core/Src/main.c`
 - `Core/Inc/bmp390.h`
 - `Core/Src/bmp390.c`
 - `Core/Inc/kalman_altitude.h`
@@ -91,7 +94,9 @@ Copy the `Core/Inc`, `Core/Src`, `Aircraft/Inc`, and `Aircraft/Src` files into y
 extern I2C_HandleTypeDef hi2c1;
 ```
 
-Call this once after `MX_I2C1_Init()`:
+The Cube-style entry point is `Core/Src/main.c`. It shows the expected HAL init order, starts GPS UART byte reception, and calls the navigation fusion update loop.
+
+Legacy compatibility wrappers are still available. Call this once after `MX_I2C1_Init()`:
 
 ```c
 Attitude_Init();

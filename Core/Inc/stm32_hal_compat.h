@@ -9,6 +9,11 @@ typedef struct
     int unused;
 } I2C_HandleTypeDef;
 
+typedef struct
+{
+    int unused;
+} UART_HandleTypeDef;
+
 typedef enum
 {
     HAL_OK = 0x00u,
@@ -36,6 +41,10 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef *hi2c,
                                    uint32_t Timeout);
 
 void HAL_Delay(uint32_t Delay);
+HAL_StatusTypeDef HAL_Init(void);
+HAL_StatusTypeDef HAL_UART_Receive_IT(UART_HandleTypeDef *huart,
+                                      uint8_t *pData,
+                                      uint16_t Size);
 uint32_t HAL_GetTick(void);
 #else
 #include "stm32h7xx_hal.h"
