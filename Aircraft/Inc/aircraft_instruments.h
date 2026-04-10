@@ -1,15 +1,18 @@
 #ifndef AIRCRAFT_INSTRUMENTS_H
 #define AIRCRAFT_INSTRUMENTS_H
 
+#include "altimeter.h"
+#include "attitude_indicator.h"
+#include "aircraft_math.h"
+#include "heading_indicator.h"
+#include "turn_slip.h"
+#include "vertical_speed_indicator.h"
+
 #include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define AIRCRAFT_STANDARD_RATE_TURN_DPS    3.0f
-#define AIRCRAFT_M_TO_FT                   3.280839895f
-#define AIRCRAFT_MPS_TO_FPM                196.8503937f
 
 typedef struct
 {
@@ -30,46 +33,6 @@ typedef struct
 
 typedef struct
 {
-    float roll_deg;
-    float pitch_deg;
-    float bank_pointer_deg;
-    uint8_t valid;
-} AttitudeIndicatorData;
-
-typedef struct
-{
-    float turn_rate_deg_s;
-    float standard_rate_fraction;
-    float slip_ball;
-    uint8_t valid;
-} TurnSlipData;
-
-typedef struct
-{
-    float magnetic_heading_deg;
-    float true_heading_deg;
-    uint16_t display_heading_deg;
-    uint8_t magnetic_valid;
-} HeadingData;
-
-typedef struct
-{
-    float altitude_m;
-    float altitude_ft;
-    int32_t display_altitude_ft;
-    uint8_t valid;
-} AltimeterData;
-
-typedef struct
-{
-    float vertical_speed_mps;
-    float vertical_speed_fpm;
-    float needle_fpm;
-    uint8_t valid;
-} VerticalSpeedData;
-
-typedef struct
-{
     AttitudeIndicatorData attitude;
     TurnSlipData turn_slip;
     HeadingData heading;
@@ -84,8 +47,6 @@ typedef struct
     float altitude_smoothing_tau_s;
     float vsi_smoothing_tau_s;
     AircraftInstrumentsOutput output;
-    uint8_t initialized;
-    uint8_t altitude_initialized;
 } AircraftInstruments;
 
 void AircraftInstruments_Init(AircraftInstruments *inst,

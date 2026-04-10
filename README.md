@@ -64,6 +64,18 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Src/kalman_altitude.c`
 - `Aircraft/Inc/aircraft_instruments.h`
 - `Aircraft/Src/aircraft_instruments.c`
+- `Aircraft/Inc/attitude_indicator.h`
+- `Aircraft/Src/attitude_indicator.c`
+- `Aircraft/Inc/turn_slip.h`
+- `Aircraft/Src/turn_slip.c`
+- `Aircraft/Inc/heading_indicator.h`
+- `Aircraft/Src/heading_indicator.c`
+- `Aircraft/Inc/altimeter.h`
+- `Aircraft/Src/altimeter.c`
+- `Aircraft/Inc/vertical_speed_indicator.h`
+- `Aircraft/Src/vertical_speed_indicator.c`
+- `Aircraft/Inc/aircraft_math.h`
+- `Aircraft/Src/aircraft_math.c`
 
 ## STM32CubeIDE Use
 
@@ -110,7 +122,7 @@ aircraft_display->altimeter.display_altitude_ft;
 aircraft_display->vsi.vertical_speed_fpm;
 ```
 
-`Aircraft/Src/aircraft_instruments.c` is intentionally separate from the IMU, barometer, and filter code. It is the display adapter for an attitude indicator, turn-and-slip, heading card, altimeter, and VSI.
+The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instruments.c` coordinates the attitude indicator, turn-and-slip, heading card, altimeter, and VSI modules without owning their display math.
 
 ## Notes
 
