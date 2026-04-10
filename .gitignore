@@ -1,0 +1,23 @@
+# Build output
+Debug/
+Release/
+build/
+cmake-build-*/
+
+# STM32CubeIDE metadata
+.metadata/
+.settings/
+*.launch
+
+# Object and binary artifacts
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+
+# Local/editor files
+.DS_Store
+*.swp
