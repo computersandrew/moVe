@@ -12,11 +12,12 @@ void MX_I2C1_Init(void);
 void MX_USART1_UART_Init(void);
 void MX_USART3_UART_Init(void);
 void MX_ADC1_Init(void);
+void MX_CRC_Init(void);
 void MX_FMC_Init(void);
 void MX_DMA2D_Init(void);
 void MX_LTDC_Init(void);
 void MX_SDMMC2_SD_Init(void);
-void MX_USB_DEVICE_Init(void);
+void MX_USB_OTG_HS_PCD_Init(void);
 void Error_Handler(void);
 
 static void NavigationFusion_AppInit(void)
@@ -46,11 +47,12 @@ int main(void)
     MX_USART1_UART_Init();
     MX_USART3_UART_Init();
     MX_ADC1_Init();
+    MX_CRC_Init();
     MX_FMC_Init();
     MX_DMA2D_Init();
     MX_LTDC_Init();
     MX_SDMMC2_SD_Init();
-    MX_USB_DEVICE_Init();
+    MX_USB_OTG_HS_PCD_Init();
 
     NavigationFusion_AppInit();
 

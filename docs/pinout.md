@@ -4,22 +4,22 @@ Target MCU: `STM32H723ZGT6` / CubeMX device `STM32H723ZGTx`
 
 Board: custom KiCad single-board design
 
-This is the current first-pass pin/peripheral plan. CubeMX should remain the source of truth for the final LTDC, FMC SDRAM, and SDMMC2 pins because those high-pin-count peripherals compete for package pins.
+This is the current pin/peripheral plan from `moVe.ioc`. CubeMX should remain the source of truth for the final LTDC, FMC SDRAM, and SDMMC2 pins because those high-pin-count peripherals compete for package pins.
 
 ## Peripheral Summary
 
 | Function | STM32 Peripheral | Current Plan | Notes |
 | --- | --- | --- | --- |
-| ICM-20948 + BMP390 | `I2C1` | `PB8` SCL, `PB9` SDA if no LTDC conflict | Use correct pull-up voltage for the bus domain. Move to another I2C bus if full RGB888 LTDC needs these pins. |
-| MAX-M10S GNSS | `USART1` | `PA9` TX, `PA10` RX if no LTDC/USB conflict | Asynchronous UART, 8N1. STM32 TX to GPS RX, GPS TX to STM32 RX. |
-| nRF52840 Bluetooth | `USART3` | `PD8` TX, `PD9` RX or CubeMX-selected alternate pins | Asynchronous UART, 8N1. Reserve RTS/CTS if high-rate telemetry needs flow control. |
+| ICM-20948 + BMP390 | `I2C1` | `PB6` SCL, `PB7` SDA | Use correct pull-up voltage for the bus domain. |
+| MAX-M10S GNSS | `USART1` | `PB14` TX, `PB15` RX | Asynchronous UART, 8N1. STM32 TX to GPS RX, GPS TX to STM32 RX. |
+| nRF52840 Bluetooth | `USART3` | `PC10` TX, `PB11` RX | Asynchronous UART, 8N1. Reserve RTS/CTS if high-rate telemetry needs flow control. |
 | nRF52840 control | GPIO | TBD | Add `NRF_RESET_N`, `NRF_BOOT_DFU`, and optional `NRF_IRQ`. |
 | SD card | `SDMMC2` | CubeMX-selected 4-bit bus | Use `SD 4 bits Wide bus`; do not enable auto-direction voltage converter unless a matching external translator is added. |
 | Display | `LTDC` | RGB TFT interface | Newhaven `NHD-5.0-800480TF-ATXL-CTP`, 800x480, parallel RGB, I2C capacitive touch. |
 | Graphics acceleration | `DMA2D` | Enable | Use for framebuffer fills, blits, and pixel format conversion. |
 | Framebuffer memory | `FMC` | `SDRAM 1`, `SDCKE0 + SDNE0`, 16-bit data | Choose the final SDRAM IC before locking row/column/timing values. |
 | Chart/log storage | `SDMMC2` + FatFs | Enable later | Store chart/map tiles and logs on microSD. |
-| Battery monitor | `ADC1` | `BATTERY_VSENSE` pin TBD | Use a resistor divider; do not feed pack voltage directly into the MCU. |
+| Battery monitor | `ADC1` | `PC4 / ADC1_INP4` | Use a resistor divider; do not feed pack voltage directly into the MCU. |
 | USB-C device/power | `USB_OTG_HS` | Device-only, embedded FS PHY if no ULPI PHY | Use USB-C VBUS for bring-up power through protection and regulators. VBUS sensing can be disabled in CubeMX for now. |
 | Debug | `SWD` | `PA13` SWDIO, `PA14` SWCLK | Add `NRST`, 3V3, GND, and optional `PB3` SWO. |
 
@@ -42,14 +42,14 @@ This is the current first-pass pin/peripheral plan. CubeMX should remain the sou
 
 ## Sensor Bus
 
-Use one shared I2C bus for the pressure and inertial sensors unless the display pin map forces a move:
+Use one shared I2C bus for the pressure and inertial sensors:
 
 | Device | Signal | STM32 Pin | Notes |
 | --- | --- | --- | --- |
-| ICM-20948 | SCL | `PB8 / I2C1_SCL` provisional | Conflicts with some LTDC/SDMMC2 alternate functions; confirm in CubeMX. |
-| ICM-20948 | SDA | `PB9 / I2C1_SDA` provisional | Conflicts with some LTDC/SDMMC2 alternate functions; confirm in CubeMX. |
-| BMP390 | SCL | `PB8 / I2C1_SCL` provisional | Same bus as IMU. |
-| BMP390 | SDA | `PB9 / I2C1_SDA` provisional | Same bus as IMU. |
+| ICM-20948 | SCL | `PB6 / I2C1_SCL` | Check voltage domain. |
+| ICM-20948 | SDA | `PB7 / I2C1_SDA` | Check voltage domain. |
+| BMP390 | SCL | `PB6 / I2C1_SCL` | Same bus as IMU. |
+| BMP390 | SDA | `PB7 / I2C1_SDA` | Same bus as IMU. |
 | ICM-20948 | INT | GPIO TBD | Optional data-ready interrupt. |
 | BMP390 | INT | GPIO TBD | Optional data-ready interrupt. |
 
@@ -68,8 +68,8 @@ MAX-M10S is handled as a UART byte stream. The parser supports UBX binary and NM
 
 | MAX-M10S Signal | STM32 Pin | Notes |
 | --- | --- | --- |
-| TXD | `PA10 / USART1_RX` provisional | GPS to STM32. Confirm this does not conflict with LTDC/USB choices. |
-| RXD | `PA9 / USART1_TX` provisional | STM32 to GPS for UBX config. Confirm this does not conflict with LTDC/USB choices. |
+| TXD | `PB15 / USART1_RX` | GPS to STM32. |
+| RXD | `PB14 / USART1_TX` | STM32 to GPS for UBX config. |
 | TIMEPULSE | GPIO TBD | Optional PPS/timepulse input. |
 | EXTINT | GPIO TBD | Optional wake/interrupt. |
 | RESET_N | GPIO TBD | Optional reset control. |
@@ -86,8 +86,8 @@ Use an nRF52840 as a Bluetooth LE co-processor on the board. Initial host link i
 
 | nRF52840 Signal | STM32 Pin | Notes |
 | --- | --- | --- |
-| nRF UART RX | `PD8 / USART3_TX` provisional | STM32 to nRF52840. |
-| nRF UART TX | `PD9 / USART3_RX` provisional | nRF52840 to STM32. |
+| nRF UART RX | `PC10 / USART3_TX` | STM32 to nRF52840. |
+| nRF UART TX | `PB11 / USART3_RX` | nRF52840 to STM32. |
 | nRF RTS | GPIO TBD | Optional flow control; reserve if routing allows. |
 | nRF CTS | GPIO TBD | Optional flow control; reserve if routing allows. |
 | nRF RESET_N | GPIO TBD | Strongly recommended. |
@@ -127,7 +127,7 @@ The first board can power from USB-C VBUS. If adding a two-cell lithium pack lat
 | --- | --- |
 | USB input | USB-C VBUS through protection into the regulator tree. |
 | Battery input | Future 2S lithium/LiFePO4-compatible path with power mux/ideal diode behavior. |
-| Battery voltage monitor | Resistor divider into `ADC1` pin TBD. |
+| Battery voltage monitor | Resistor divider into `PC4 / ADC1_INP4`. |
 | Current monitor | Optional shunt/current-sense amplifier. |
 | Backlight supply | Separate LED boost/current driver for the Newhaven backlight. |
 | 3.3 V rail | STM32, GNSS, nRF52840, BMP390, touch, SD, and display logic. |
@@ -139,12 +139,12 @@ Use `SDMMC2` because that is the SDMMC instance CubeMX exposed cleanly for the S
 
 | SD Signal | STM32 Pin | Notes |
 | --- | --- | --- |
-| D0 | CubeMX-selected `SDMMC2_D0` | 4-bit SDMMC. |
-| D1 | CubeMX-selected `SDMMC2_D1` | 4-bit SDMMC. |
-| D2 | CubeMX-selected `SDMMC2_D2` | 4-bit SDMMC. |
-| D3 | CubeMX-selected `SDMMC2_D3` | 4-bit SDMMC. |
-| CK | CubeMX-selected `SDMMC2_CK` | Controlled impedance/routing care. |
-| CMD | CubeMX-selected `SDMMC2_CMD` | Pull-up per SD requirements. |
+| D0 | `PG9 / SDMMC2_D0` | 4-bit SDMMC. |
+| D1 | `PG10 / SDMMC2_D1` | 4-bit SDMMC. |
+| D2 | `PG11 / SDMMC2_D2` | 4-bit SDMMC. |
+| D3 | `PG12 / SDMMC2_D3` | 4-bit SDMMC. |
+| CK | `PD6 / SDMMC2_CK` | Controlled impedance/routing care. |
+| CMD | `PA0 / SDMMC2_CMD` | Pull-up per SD requirements. |
 | CD | GPIO TBD | Optional card detect. |
 
 Do not use the auto-direction voltage converter mode unless the schematic includes the matching external SD voltage translator.
@@ -155,13 +155,34 @@ Current display direction: Newhaven `NHD-5.0-800480TF-ATXL-CTP`.
 
 | Display Signal | STM32 / Board Connection | Notes |
 | --- | --- | --- |
-| `R0-R7` | `LTDC_R0-R7` or reduced color subset | Full RGB888 consumes many pins; use CubeMX to resolve conflicts. |
-| `G0-G7` | `LTDC_G0-G7` or reduced color subset | Full RGB888 consumes many pins; use CubeMX to resolve conflicts. |
-| `B0-B7` | `LTDC_B0-B7` or reduced color subset | Full RGB888 consumes many pins; use CubeMX to resolve conflicts. |
-| `CLKIN` | `LTDC_CLK` | Pixel clock. |
-| `HSD` | `LTDC_HSYNC` | Horizontal sync. |
-| `VSD` | `LTDC_VSYNC` | Vertical sync. |
-| `DEN` | `LTDC_DE` | Display enable. |
+| `R0` | `PG13 / LTDC_R0` | 24-bit RGB888 bus from CubeMX. |
+| `R1` | `PA2 / LTDC_R1` | 24-bit RGB888 bus from CubeMX. |
+| `R2` | `PA1 / LTDC_R2` | 24-bit RGB888 bus from CubeMX. |
+| `R3` | `PB0 / LTDC_R3` | 24-bit RGB888 bus from CubeMX. |
+| `R4` | `PA5 / LTDC_R4` | 24-bit RGB888 bus from CubeMX. |
+| `R5` | `PC0 / LTDC_R5` | 24-bit RGB888 bus from CubeMX. |
+| `R6` | `PB1 / LTDC_R6` | 24-bit RGB888 bus from CubeMX. |
+| `R7` | `PG6 / LTDC_R7` | 24-bit RGB888 bus from CubeMX. |
+| `G0` | `PE5 / LTDC_G0` | 24-bit RGB888 bus from CubeMX. |
+| `G1` | `PE6 / LTDC_G1` | 24-bit RGB888 bus from CubeMX. |
+| `G2` | `PA6 / LTDC_G2` | 24-bit RGB888 bus from CubeMX. |
+| `G3` | `PC9 / LTDC_G3` | 24-bit RGB888 bus from CubeMX. |
+| `G4` | `PB10 / LTDC_G4` | 24-bit RGB888 bus from CubeMX. |
+| `G5` | `PC1 / LTDC_G5` | 24-bit RGB888 bus from CubeMX. |
+| `G6` | `PC7 / LTDC_G6` | 24-bit RGB888 bus from CubeMX. |
+| `G7` | `PD3 / LTDC_G7` | 24-bit RGB888 bus from CubeMX. |
+| `B0` | `PE4 / LTDC_B0` | 24-bit RGB888 bus from CubeMX. |
+| `B1` | `PA10 / LTDC_B1` | 24-bit RGB888 bus from CubeMX. |
+| `B2` | `PA3 / LTDC_B2` | 24-bit RGB888 bus from CubeMX. |
+| `B3` | `PA8 / LTDC_B3` | 24-bit RGB888 bus from CubeMX. |
+| `B4` | `PC11 / LTDC_B4` | 24-bit RGB888 bus from CubeMX. |
+| `B5` | `PB5 / LTDC_B5` | 24-bit RGB888 bus from CubeMX. |
+| `B6` | `PA15 / LTDC_B6` | 24-bit RGB888 bus from CubeMX. |
+| `B7` | `PD2 / LTDC_B7` | 24-bit RGB888 bus from CubeMX. |
+| `CLKIN` | `PG7 / LTDC_CLK` | Pixel clock. |
+| `HSD` | `PC6 / LTDC_HSYNC` | Horizontal sync. |
+| `VSD` | `PA4 / LTDC_VSYNC` | Vertical sync. |
+| `DEN` | `PF10 / LTDC_DE` | Display enable. |
 | `STBYB` | GPIO TBD | Display standby control. |
 | `LED+ / LED-` | Backlight LED driver | Do not drive directly from STM32. |
 | Touch SCL/SDA | I2C bus TBD | Capacitive touch interface. |
@@ -176,12 +197,12 @@ Use FMC `SDRAM 1` with `SDCKE0 + SDNE0` for the first board spin.
 
 | SDRAM Signal Group | Plan |
 | --- | --- |
-| Data | 16-bit, `D0-D15`. |
-| Byte masks | Enable `NBL0/NBL1` if the SDRAM has `LDQM/UDQM`. |
-| Address | Match the selected SDRAM IC row/column geometry. |
-| Bank address | Match selected SDRAM IC, usually `BA0/BA1` for 4 internal banks. |
-| Clock/chip enable | `SDCLK`, `SDCKE0`, `SDNE0`. |
-| Control | `SDNRAS`, `SDNCAS`, `SDNWE`. |
+| Data | `PD14` D0, `PD15` D1, `PD0` D2, `PD1` D3, `PE7` D4, `PE8` D5, `PE9` D6, `PE10` D7, `PE11` D8, `PE12` D9, `PE13` D10, `PE14` D11, `PE15` D12, `PD8` D13, `PD9` D14, `PD10` D15. |
+| Byte masks | `PE0 / FMC_NBL0`, `PE1 / FMC_NBL1`. |
+| Address | `PF0` A0, `PF1` A1, `PF2` A2, `PF3` A3, `PF4` A4, `PF5` A5, `PF12` A6, `PF13` A7, `PF14` A8, `PF15` A9, `PG0` A10, `PG1` A11, `PG2` A12. |
+| Bank address | `PG4 / FMC_BA0`, `PG5 / FMC_BA1`. |
+| Clock/chip enable | `PG8 / FMC_SDCLK`, `PC3_C / FMC_SDCKE0`, `PC2_C / FMC_SDNE0`. |
+| Control | `PF11 / FMC_SDNRAS`, `PG15 / FMC_SDNCAS`, `PA7 / FMC_SDNWE`. |
 | Timing | Copy from the selected SDRAM datasheet into CubeMX. |
 
 Pick the exact SDRAM part before finalizing row bits, column bits, CAS latency, refresh, and timing values.
@@ -200,14 +221,11 @@ Add separate debug access for the nRF52840.
 
 ## Open Pin Decisions
 
-- Final LTDC color depth and exact RGB pin mapping.
+- Final LTDC timing values for the Newhaven panel.
 - Exact SDRAM part number and timing values.
-- SDMMC2 pin route that does not collide with LTDC/FMC.
-- Whether I2C1 stays on `PB8/PB9` or moves to another I2C bus because of display conflicts.
 - nRF52840 GPIO choices for reset, DFU, IRQ, RTS, and CTS.
 - GPS TIMEPULSE and reset pins.
 - IMU and BMP390 interrupt pins.
 - SD card detect pin.
 - USB VBUS sense option.
-- Battery sense ADC pin.
 - Power tree and voltage domains for sensor I2C.

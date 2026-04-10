@@ -12,26 +12,27 @@
 
 ## STM32CubeMX Bring-Up
 
-- [ ] Create `.ioc` project for `STM32H723ZGT6`.
+- [x] Create `.ioc` project for `STM32H723ZGT6`.
 - [ ] Configure system clock.
-- [ ] Configure I2C for ICM-20948 and BMP390.
-- [ ] Configure `USART1` asynchronous UART for MAX-M10S.
-- [ ] Configure `USART3` asynchronous UART for nRF52840 Bluetooth link.
-- [ ] Configure `USB_OTG_HS` as `Device_Only` using embedded FS PHY unless an external ULPI PHY is added.
-- [ ] Disable USB VBUS sensing for first bring-up or route a safe divided sense option for later.
-- [ ] Configure `ADC1` battery voltage sense pin.
-- [ ] Configure `LTDC` for the Newhaven RGB TFT display.
-- [ ] Configure `DMA2D` for GUI acceleration.
-- [ ] Configure `FMC` `SDRAM 1` with `SDCKE0 + SDNE0`, 16-bit data, and SDRAM-part-specific timing.
-- [ ] Configure `SDMMC2` in `SD 4 bits Wide bus` mode without auto-direction voltage converter.
-- [ ] Enable `CRC`.
+- [x] Configure I2C for ICM-20948 and BMP390.
+- [x] Configure `USART1` asynchronous UART for MAX-M10S.
+- [x] Configure `USART3` asynchronous UART for nRF52840 Bluetooth link.
+- [x] Configure `USB_OTG_HS` as `Device_Only` using embedded FS PHY unless an external ULPI PHY is added.
+- [x] Disable USB VBUS sensing for first bring-up or route a safe divided sense option for later.
+- [x] Configure `ADC1` battery voltage sense pin.
+- [x] Configure `LTDC` for the Newhaven RGB TFT display.
+- [x] Configure `DMA2D` for GUI acceleration.
+- [x] Configure `FMC` `SDRAM 1` with `SDCKE0 + SDNE0` and 16-bit data.
+- [ ] Finalize SDRAM timing from the selected SDRAM part datasheet.
+- [x] Configure `SDMMC2` in `SD 4 bits Wide bus` mode without auto-direction voltage converter.
+- [x] Enable `CRC`.
 - [ ] Decide whether to enable `RNG`.
 - [ ] Leave `DFSDM1`, `I2S`, `SAI`, `DCMI`, and `PWR Wake-Up 1` disabled unless a later feature needs them.
-- [ ] Leave FreeRTOS disabled for first hardware bring-up.
+- [x] Leave FreeRTOS disabled for first hardware bring-up.
 - [ ] Configure debug UART or SWO logging.
-- [ ] Configure `DEBUG` / `SYS` as `Serial Wire`.
+- [x] Configure `DEBUG` / `SYS` as `Serial Wire`.
 - [ ] Confirm all GPIO alternate functions.
-- [ ] Cross-check CubeMX pins against `docs/pinout.md`.
+- [x] Cross-check CubeMX pins against `docs/pinout.md`.
 
 ## ICM-20948 AHRS
 
@@ -110,7 +111,7 @@
 
 - [x] Select initial display hardware direction: Newhaven `NHD-5.0-800480TF-ATXL-CTP`.
 - [x] Select initial display interface direction: `LTDC` parallel RGB, not SPI.
-- [ ] Select exact LTDC color-depth wiring after resolving CubeMX pin conflicts.
+- [x] Select exact LTDC color-depth wiring after resolving CubeMX pin conflicts.
 - [ ] Add external SDRAM part for framebuffer storage.
 - [ ] Add TFT backlight LED boost/current driver.
 - [ ] Add capacitive touch I2C, reset, and interrupt wiring.

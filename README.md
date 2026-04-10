@@ -101,6 +101,7 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Inc/navigation_fusion.h`
 - `Core/Src/navigation_fusion.c`
 - `Core/Src/main.c`
+- `moVe.ioc`
 - `docs/pinout.md`
 - `Core/Inc/bmp390.h`
 - `Core/Src/bmp390.c`
@@ -133,7 +134,7 @@ Copy the `Core/Inc`, `Core/Src`, `Aircraft/Inc`, and `Aircraft/Src` files into y
 extern I2C_HandleTypeDef hi2c1;
 ```
 
-The Cube-style entry point is `Core/Src/main.c`. It shows the expected HAL init order for the H723 board direction, including I2C sensors, GPS UART, nRF UART, ADC battery sense, FMC SDRAM, DMA2D, LTDC, SDMMC2, USB device, GPS UART byte reception, and the navigation fusion update loop.
+The Cube-style entry point is `Core/Src/main.c`. It shows the expected HAL init order for the H723 board direction, including I2C sensors, GPS UART, nRF UART, ADC battery sense, CRC, FMC SDRAM, DMA2D, LTDC, SDMMC2, USB OTG HS device mode with internal FS PHY, GPS UART byte reception, and the navigation fusion update loop.
 
 Legacy compatibility wrappers are still available. Call this once after `MX_I2C1_Init()`:
 
