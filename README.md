@@ -1,13 +1,15 @@
 # moVe
 
-High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, and u-blox M10 GNSS. Will include an option for Non-Volatile Storage for Datalogging and USB. Will debate 802.11ac/Bluetooth 4.0LE implementation
+High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, and u-blox M10 GNSS. Will include an option for Non-Volatile Storage for Datalogging and USB. Will debate the 802.11ac/Bluetooth 4.0 LE implementation.
+
+To include a header for possible 3.3V Lithium Ion Cells
 
 This is a plain C STM32 HAL implementation for:
 
 ## ICM-20948 + Madgwick AHRS for STM32H7
 [Datasheet](https://d17t6iyxenbwp1.cloudfront.net/s3fs-public/2026-01/DS-000189-ICM-20948-v1.6.pdf?VersionId=XteIUeEiGGKWJDQjSzr3D2K3OIitFvHY)
 
-- To run on 3.3V Bus
+- To run on 1.8V Bus - Low-Dropout Regulator (MIC5225)
 - ICM-20948 by InvenSense TDK
 - ICM-20948 accelerometer and gyroscope over I2C. 
 - ICM-20948 contains the AK09916 magnetometer (allegedly according to adafruit) through ICM-20948 bypass mode.
