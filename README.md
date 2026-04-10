@@ -22,10 +22,13 @@ This is a plain C STM32 HAL implementation for:
 - I2C, SPI capabilities
 - Also, temperature capabilities 
 
-## u-blox m10 (version tbd) for STM32H7
+## U-Blox MAX-M10S for STM32H7
+
+[Datasheet](https://content.u-blox.com/sites/default/files/MAX-M10S_DataSheet_UBX-20035208.pdf)
+- To run on 3.3V Bus
 - moving map/navigation
 - Outputs MSL elevation data, Ground Speed, Lat/Long Coordinates
-- To run on 5V Bus?
+- Will include uFL connector, as well as ceramic patch antenna by default
 
 ## Files (so far) will update
 
