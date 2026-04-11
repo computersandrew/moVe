@@ -70,6 +70,7 @@ This is a plain C STM32 HAL implementation for:
 
 ## Parts List
 
+- GitHub spreadsheet/BOM: `docs/parts.csv`
 - STM32H723ZGT6 MCU
 - nRF52840 Bluetooth LE SoC or module
 - U-Blox MAX-M10S GNSS receiver
@@ -104,6 +105,7 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Src/main.c`
 - `moVe.ioc`
 - `docs/pinout.md`
+- `docs/parts.csv`
 - `Core/Inc/bmp390.h`
 - `Core/Src/bmp390.c`
 - `Core/Inc/kalman_altitude.h`
