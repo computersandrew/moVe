@@ -11,6 +11,7 @@ This is a plain C STM32 HAL implementation for:
 ## Custom Board
 
 - Main MCU: STM32H723ZGT6.
+- STM32H723ZG datasheet: [STMicroelectronics PDF](https://www.st.com/resource/en/datasheet/stm32h723zg.pdf).
 - Designed as a custom single board in KiCad.
 - Initial pinout draft: `docs/pinout.md`.
 - nRF52840 Bluetooth LE co-processor on a UART host link, with reset/DFU/debug lines reserved.
