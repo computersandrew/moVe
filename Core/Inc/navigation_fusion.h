@@ -3,6 +3,7 @@
 
 #include "aircraft_instruments.h"
 #include "bmp390.h"
+#include "crew_instruments.h"
 #include "icm20948.h"
 #include "kalman_altitude.h"
 #include "madgwick.h"
@@ -38,6 +39,7 @@ typedef struct
     MadgwickAHRS ahrs;
     KalmanAltitude altitude_filter;
     AircraftInstruments aircraft_instruments;
+    CrewInstruments crew_instruments;
     AttitudeDeg attitude_deg;
     BMP390_Sample baro_sample;
     MAXM10S_NavSample gps_sample;
@@ -65,6 +67,7 @@ void NavigationFusion_SetMagneticDeclination(NavigationFusion *fusion,
                                              float magnetic_declination_deg);
 
 const AircraftInstrumentsOutput *NavigationFusion_GetAircraftDisplay(const NavigationFusion *fusion);
+const CrewInstrumentsOutput *NavigationFusion_GetCrewDisplay(const NavigationFusion *fusion);
 const AttitudeDeg *NavigationFusion_GetAttitude(const NavigationFusion *fusion);
 const BMP390_Sample *NavigationFusion_GetBaroSample(const NavigationFusion *fusion);
 const MAXM10S_NavSample *NavigationFusion_GetGpsSample(const NavigationFusion *fusion);

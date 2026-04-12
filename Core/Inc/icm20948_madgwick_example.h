@@ -11,6 +11,8 @@ extern NavigationFusion navigation_fusion;
 extern AttitudeDeg attitude_deg;
 extern AircraftInstruments aircraft_instruments;
 extern const AircraftInstrumentsOutput *aircraft_display;
+extern CrewInstruments crew_instruments;
+extern const CrewInstrumentsOutput *crew_display;
 extern BMP390_Sample baro_sample;
 extern MAXM10S_NavSample gps_sample;
 

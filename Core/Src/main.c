@@ -67,7 +67,8 @@ int main(void)
 
         /*
          * Render from NavigationFusion_GetAircraftDisplay(&navigation_fusion)
-         * in a display task or at a fixed display refresh rate.
+         * or NavigationFusion_GetCrewDisplay(&navigation_fusion) in a display
+         * task or at a fixed display refresh rate.
          */
     }
 }

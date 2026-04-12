@@ -36,6 +36,21 @@ static void fill_aircraft_input(NavigationFusion *fusion,
     aircraft_input->gps_speed_valid = fusion->gps_sample.speed_valid;
 }
 
+static void fill_crew_input(NavigationFusion *fusion,
+                            const ICM20948_Sample *imu_sample,
+                            uint8_t baro_display_valid,
+                            CrewInstrumentsInput *crew_input)
+{
+    crew_input->roll_deg = fusion->attitude_deg.roll_deg;
+    crew_input->ax_g = imu_sample->ax_g;
+    crew_input->ay_g = imu_sample->ay_g;
+    crew_input->az_g = imu_sample->az_g;
+    crew_input->gps_ground_speed_mps = fusion->gps_sample.ground_speed_mps;
+    crew_input->outside_air_temp_c = fusion->baro_sample.temperature_c;
+    crew_input->gps_speed_valid = fusion->gps_sample.speed_valid;
+    crew_input->temperature_valid = baro_display_valid;
+}
+
 HAL_StatusTypeDef NavigationFusion_Init(NavigationFusion *fusion,
                                         const NavigationFusion_Config *config)
 {
@@ -83,6 +98,7 @@ HAL_StatusTypeDef NavigationFusion_Init(NavigationFusion *fusion,
     MAXM10S_Init(&fusion->gps_parser);
     AircraftInstruments_Init(&fusion->aircraft_instruments,
                              config->magnetic_declination_deg);
+    CrewInstruments_Init(&fusion->crew_instruments);
     fusion->last_update_ms = HAL_GetTick();
     fusion->initialized = 1u;
 
@@ -93,6 +109,7 @@ HAL_StatusTypeDef NavigationFusion_Update(NavigationFusion *fusion)
 {
     ICM20948_Sample imu_sample;
     AircraftInstrumentsInput aircraft_input;
+    CrewInstrumentsInput crew_input;
     uint32_t now_ms;
     float dt_s;
     HAL_StatusTypeDef status;
@@ -162,6 +179,9 @@ HAL_StatusTypeDef NavigationFusion_Update(NavigationFusion *fusion)
     fill_aircraft_input(fusion, &imu_sample, baro_display_valid, &aircraft_input);
     AircraftInstruments_Update(&fusion->aircraft_instruments, &aircraft_input, dt_s);
 
+    fill_crew_input(fusion, &imu_sample, baro_display_valid, &crew_input);
+    CrewInstruments_Update(&fusion->crew_instruments, &crew_input, dt_s);
+
     return HAL_OK;
 }
 
@@ -214,6 +234,15 @@ const AircraftInstrumentsOutput *NavigationFusion_GetAircraftDisplay(const Navig
     }
 
     return AircraftInstruments_GetOutput(&fusion->aircraft_instruments);
+}
+
+const CrewInstrumentsOutput *NavigationFusion_GetCrewDisplay(const NavigationFusion *fusion)
+{
+    if (fusion == NULL) {
+        return NULL;
+    }
+
+    return CrewInstruments_GetOutput(&fusion->crew_instruments);
 }
 
 const AttitudeDeg *NavigationFusion_GetAttitude(const NavigationFusion *fusion)

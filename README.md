@@ -29,6 +29,14 @@ This is a plain C STM32 HAL implementation for:
 - Roll, pitch, yaw, and aircraft/drone display ready instrument values.
 - Roll/Pitch applications for marine use
 
+## Crew Display Outputs
+
+- Converts the same IMU, GPS, and BMP390 data path into rowing-facing values.
+- Roll state reports `Port`, `Starboard`, or `Set` from filtered roll angle.
+- Speed uses GNSS ground speed when valid and exposes meters/second, km/h, and knots.
+- Stroke rate estimates strokes per minute from cyclic IMU acceleration.
+- Temperature comes from the BMP390 compensated temperature sample.
+
 ## BMP390 + Simple Kalman Filtering for STM32H7
 [Datasheet](https://www.mouser.com/datasheet/3/1046/1/bst_bmp390_ds002.pdf)
 - To run on 3.3V Bus
@@ -128,10 +136,12 @@ This is a plain C STM32 HAL implementation for:
 - `Aircraft/Src/vertical_speed_indicator.c`
 - `Aircraft/Inc/aircraft_math.h`
 - `Aircraft/Src/aircraft_math.c`
+- `Crew/Inc/crew_instruments.h`
+- `Crew/Src/crew_instruments.c`
 
 ## STM32CubeIDE Use
 
-Copy the `Core/Inc`, `Core/Src`, `Aircraft/Inc`, and `Aircraft/Src` files into your STM32H7 project. Enable I2C in CubeMX, then make sure the example uses the matching handle:
+Copy the `Core/Inc`, `Core/Src`, `Aircraft/Inc`, `Aircraft/Src`, `Crew/Inc`, and `Crew/Src` files into your STM32H7 project. Enable I2C in CubeMX, then make sure the example uses the matching handle:
 
 ```c
 extern I2C_HandleTypeDef hi2c1;
@@ -177,7 +187,22 @@ aircraft_display->vsi.vertical_speed_fpm;
 aircraft_display->airspeed.display_true_airspeed_kt;
 ```
 
+The crew display values are in:
+
+```c
+#include "icm20948_madgwick_example.h"
+
+crew_display->roll_deg;
+CrewInstruments_RollStateText(crew_display->roll_state);
+crew_display->speed_mps;
+crew_display->speed_kph;
+crew_display->speed_kt;
+crew_display->strokes_per_minute;
+crew_display->temperature_c;
+```
+
 The aircraft display layer is split by instrument. `Aircraft/Src/aircraft_instruments.c` coordinates the attitude indicator, turn-and-slip, heading card, altimeter, VSI, and airspeed modules without owning their display math.
+The crew display layer is in `Crew/Src/crew_instruments.c` and is updated by `NavigationFusion_Update()` alongside the aircraft outputs.
 
 ## Notes
 

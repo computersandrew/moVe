@@ -6,6 +6,7 @@
 - [x] Add `navigation_fusion` module for IMU, barometer, GPS, AHRS, altitude, and aircraft-display outputs.
 - [x] Keep legacy `Attitude_Init()` / `Attitude_Update()` wrappers for compatibility.
 - [x] Add Cube-style `main.c` skeleton.
+- [x] Add `Crew` display layer for roll set, speed, stroke rate, and BMP390 temperature.
 - [ ] Replace skeleton declarations with STM32CubeMX-generated files.
 - [x] Decide initial scheduler stance: bare-metal/superloop for first bring-up, FreeRTOS later.
 - [ ] Add module-level fault/status outputs.
@@ -106,6 +107,15 @@
 - [ ] Add pitot/static differential pressure sensor support.
 - [ ] Add wind-aware correction if wind estimate becomes available.
 - [ ] Clearly label source on display: TAS estimate vs GPS ground speed.
+
+## Crew Instruments
+
+- [x] Add roll display state: Port, Starboard, or Set.
+- [x] Add GNSS-backed speed output.
+- [x] Add IMU-based stroke-rate estimate in strokes per minute.
+- [x] Add BMP390 temperature output.
+- [ ] Tune stroke-axis mapping and thresholds on the physical boat.
+- [ ] Decide final rowing display units and labels.
 
 ## Display
 

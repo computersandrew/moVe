@@ -6,6 +6,8 @@ NavigationFusion navigation_fusion;
 AttitudeDeg attitude_deg;
 AircraftInstruments aircraft_instruments;
 const AircraftInstrumentsOutput *aircraft_display;
+CrewInstruments crew_instruments;
+const CrewInstrumentsOutput *crew_display;
 BMP390_Sample baro_sample;
 MAXM10S_NavSample gps_sample;
 
@@ -21,6 +23,8 @@ static void sync_legacy_outputs(void)
 
     aircraft_instruments = navigation_fusion.aircraft_instruments;
     aircraft_display = AircraftInstruments_GetOutput(&aircraft_instruments);
+    crew_instruments = navigation_fusion.crew_instruments;
+    crew_display = CrewInstruments_GetOutput(&crew_instruments);
 
     if (baro != 0) {
         baro_sample = *baro;
