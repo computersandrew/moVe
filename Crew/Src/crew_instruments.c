@@ -75,23 +75,58 @@ static void update_stroke_rate(CrewInstruments *crew,
                                float dt_s)
 {
     const float dynamic_accel_g = input->ax_g - crew->stroke_axis_baseline_g;
+    const float clamped_dt_s = clampf(dt_s, CREW_MIN_DT_S, CREW_MAX_DT_S);
 
-    crew->seconds_since_stroke += clampf(dt_s, CREW_MIN_DT_S, CREW_MAX_DT_S);
+    crew->seconds_since_stroke += clamped_dt_s;
     crew->stroke_axis_baseline_g = low_pass(crew->stroke_axis_baseline_g,
                                             input->ax_g,
                                             dt_s,
                                             1.25f);
 
+    switch (crew->stroke_phase) {
+    case CREW_STROKE_PHASE_CATCH:
+        crew->catch_time_s += clamped_dt_s;
+        if (crew->catch_time_s >= crew->catch_hold_s) {
+            crew->output.catch_time_s = crew->catch_time_s;
+            crew->drive_time_s = 0.0f;
+            crew->stroke_phase = CREW_STROKE_PHASE_DRIVE;
+        }
+        break;
+    case CREW_STROKE_PHASE_DRIVE:
+        crew->drive_time_s += clamped_dt_s;
+        break;
+    case CREW_STROKE_PHASE_RECOVERY:
+        crew->recovery_time_s += clamped_dt_s;
+        break;
+    case CREW_STROKE_PHASE_UNKNOWN:
+    default:
+        break;
+    }
+
     if (dynamic_accel_g < crew->stroke_trigger_low_g) {
         crew->stroke_armed = 1u;
+
+        if (crew->stroke_phase == CREW_STROKE_PHASE_DRIVE) {
+            crew->output.drive_time_s = crew->drive_time_s;
+            crew->recovery_time_s = 0.0f;
+            crew->stroke_phase = CREW_STROKE_PHASE_RECOVERY;
+        } else if (crew->stroke_phase == CREW_STROKE_PHASE_UNKNOWN) {
+            crew->recovery_time_s = 0.0f;
+            crew->stroke_phase = CREW_STROKE_PHASE_RECOVERY;
+        }
     }
 
     if ((crew->stroke_armed != 0u) &&
         (dynamic_accel_g > crew->stroke_trigger_high_g)) {
         const float interval_s = crew->seconds_since_stroke;
+        const float recovery_time_s = crew->recovery_time_s;
 
         crew->stroke_armed = 0u;
         crew->seconds_since_stroke = 0.0f;
+        crew->catch_time_s = 0.0f;
+        crew->drive_time_s = 0.0f;
+        crew->recovery_time_s = 0.0f;
+        crew->stroke_phase = CREW_STROKE_PHASE_CATCH;
 
         if ((interval_s >= crew->min_stroke_interval_s) &&
             (interval_s <= crew->max_stroke_interval_s)) {
@@ -107,6 +142,18 @@ static void update_stroke_rate(CrewInstruments *crew,
                              crew->stroke_smoothing_tau_s);
             }
             crew->output.stroke_rate_valid = 1u;
+            crew->output.recovery_time_s = recovery_time_s;
+            crew->output.stroke_cycle_time_s = interval_s;
+            if ((crew->output.drive_time_s > 0.0f) && (recovery_time_s > 0.0f)) {
+                crew->output.drive_recovery_ratio =
+                    crew->output.drive_time_s / recovery_time_s;
+                crew->output.recovery_drive_ratio =
+                    recovery_time_s / crew->output.drive_time_s;
+            } else {
+                crew->output.drive_recovery_ratio = 0.0f;
+                crew->output.recovery_drive_ratio = 0.0f;
+            }
+            crew->output.stroke_timing_valid = 1u;
         }
     }
 
@@ -117,6 +164,26 @@ static void update_stroke_rate(CrewInstruments *crew,
                      dt_s,
                      crew->stroke_smoothing_tau_s);
         crew->output.stroke_rate_valid = 0u;
+        crew->output.stroke_timing_valid = 0u;
+        crew->stroke_phase = CREW_STROKE_PHASE_RECOVERY;
+    }
+
+    crew->output.stroke_phase = crew->stroke_phase;
+
+    switch (crew->stroke_phase) {
+    case CREW_STROKE_PHASE_CATCH:
+        crew->output.current_phase_time_s = crew->catch_time_s;
+        break;
+    case CREW_STROKE_PHASE_DRIVE:
+        crew->output.current_phase_time_s = crew->drive_time_s;
+        break;
+    case CREW_STROKE_PHASE_RECOVERY:
+        crew->output.current_phase_time_s = crew->recovery_time_s;
+        break;
+    case CREW_STROKE_PHASE_UNKNOWN:
+    default:
+        crew->output.current_phase_time_s = 0.0f;
+        break;
     }
 }
 
@@ -133,10 +200,15 @@ void CrewInstruments_Init(CrewInstruments *crew)
     crew->stroke_axis_baseline_g = 0.0f;
     crew->stroke_trigger_high_g = 0.16f;
     crew->stroke_trigger_low_g = 0.04f;
+    crew->catch_hold_s = 0.12f;
     crew->min_stroke_interval_s = 0.75f;
     crew->max_stroke_interval_s = 4.00f;
     crew->seconds_since_stroke = CREW_NO_STROKE_TIMEOUT_S;
+    crew->catch_time_s = 0.0f;
+    crew->drive_time_s = 0.0f;
+    crew->recovery_time_s = 0.0f;
     crew->stroke_armed = 1u;
+    crew->stroke_phase = CREW_STROKE_PHASE_RECOVERY;
 
     crew->output.roll_deg = 0.0f;
     crew->output.roll_state = CREW_ROLL_SET;
@@ -144,9 +216,18 @@ void CrewInstruments_Init(CrewInstruments *crew)
     crew->output.speed_kph = 0.0f;
     crew->output.speed_kt = 0.0f;
     crew->output.strokes_per_minute = 0.0f;
+    crew->output.stroke_phase = CREW_STROKE_PHASE_RECOVERY;
+    crew->output.current_phase_time_s = 0.0f;
+    crew->output.catch_time_s = 0.0f;
+    crew->output.drive_time_s = 0.0f;
+    crew->output.recovery_time_s = 0.0f;
+    crew->output.drive_recovery_ratio = 0.0f;
+    crew->output.recovery_drive_ratio = 0.0f;
+    crew->output.stroke_cycle_time_s = 0.0f;
     crew->output.temperature_c = 0.0f;
     crew->output.speed_valid = 0u;
     crew->output.stroke_rate_valid = 0u;
+    crew->output.stroke_timing_valid = 0u;
     crew->output.temperature_valid = 0u;
 }
 
@@ -202,5 +283,20 @@ const char *CrewInstruments_RollStateText(CrewRollState roll_state)
     case CREW_ROLL_SET:
     default:
         return "Set";
+    }
+}
+
+const char *CrewInstruments_StrokePhaseText(CrewStrokePhase stroke_phase)
+{
+    switch (stroke_phase) {
+    case CREW_STROKE_PHASE_CATCH:
+        return "Catch";
+    case CREW_STROKE_PHASE_DRIVE:
+        return "Drive";
+    case CREW_STROKE_PHASE_RECOVERY:
+        return "Recovery";
+    case CREW_STROKE_PHASE_UNKNOWN:
+    default:
+        return "Unknown";
     }
 }

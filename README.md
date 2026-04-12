@@ -147,6 +147,7 @@ This is a plain C STM32 HAL implementation for:
 - Roll state reports `Port`, `Starboard`, or `Set` from filtered roll angle.
 - Speed uses GNSS ground speed when valid and exposes meters/second, km/h, and knots.
 - Stroke rate estimates strokes per minute from cyclic IMU acceleration.
+- Stroke phase reports `Catch`, `Drive`, or `Recovery` with phase and cycle timing.
 - Temperature comes from the BMP390 compensated temperature sample.
 
 ## STM32CubeIDE Use
@@ -208,6 +209,14 @@ crew_display->speed_mps;
 crew_display->speed_kph;
 crew_display->speed_kt;
 crew_display->strokes_per_minute;
+CrewInstruments_StrokePhaseText(crew_display->stroke_phase);
+crew_display->current_phase_time_s;
+crew_display->catch_time_s;
+crew_display->drive_time_s;
+crew_display->recovery_time_s;
+crew_display->drive_recovery_ratio;
+crew_display->recovery_drive_ratio;
+crew_display->stroke_cycle_time_s;
 crew_display->temperature_c;
 ```
 

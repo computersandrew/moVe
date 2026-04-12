@@ -113,6 +113,8 @@
 - [x] Add roll display state: Port, Starboard, or Set.
 - [x] Add GNSS-backed speed output.
 - [x] Add IMU-based stroke-rate estimate in strokes per minute.
+- [x] Add catch, drive, and recovery phase timing.
+- [x] Add drive-to-recovery and recovery-to-drive ratio outputs.
 - [x] Add BMP390 temperature output.
 - [ ] Tune stroke-axis mapping and thresholds on the physical boat.
 - [ ] Decide final rowing display units and labels.
