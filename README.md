@@ -58,6 +58,7 @@ This is a plain C STM32 HAL implementation for:
 - RF layout should follow Nordic guidance with antenna keepout and matching network.
 
 ## Graphical Display Path
+[Datasheet](https://newhavendisplay.com/content/specs/NHD-5.0-800480TF-ATXL-CTP.pdf)
 
 - Newhaven `NHD-5.0-800480TF-ATXL-CTP` 5 inch, 800x480 RGB TFT with capacitive touch.
 - STM32 `LTDC` drives the parallel RGB display interface.
