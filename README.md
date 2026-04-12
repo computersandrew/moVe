@@ -29,14 +29,6 @@ This is a plain C STM32 HAL implementation for:
 - Roll, pitch, yaw, and aircraft/drone display ready instrument values.
 - Roll/Pitch applications for marine use
 
-## Crew Display Outputs
-
-- Converts the same IMU, GPS, and BMP390 data path into rowing-facing values.
-- Roll state reports `Port`, `Starboard`, or `Set` from filtered roll angle.
-- Speed uses GNSS ground speed when valid and exposes meters/second, km/h, and knots.
-- Stroke rate estimates strokes per minute from cyclic IMU acceleration.
-- Temperature comes from the BMP390 compensated temperature sample.
-
 ## BMP390 + Simple Kalman Filtering for STM32H7
 [Datasheet](https://www.mouser.com/datasheet/3/1046/1/bst_bmp390_ds002.pdf)
 - To run on 3.3V Bus
@@ -138,6 +130,23 @@ This is a plain C STM32 HAL implementation for:
 - `Aircraft/Src/aircraft_math.c`
 - `Crew/Inc/crew_instruments.h`
 - `Crew/Src/crew_instruments.c`
+
+## Aircraft Display Outputs
+
+- Converts the same IMU, GPS, and BMP390 data path into aircraft-facing instrument values.
+- Attitude reports roll and pitch from filtered AHRS output.
+- Turn-and-slip reports yaw-rate turn indication and lateral-acceleration slip ball.
+- Heading reports display heading with configurable magnetic declination.
+- Altimeter and VSI report altitude and vertical speed from BMP390 pressure and the altitude filter.
+- Airspeed reports estimated true airspeed from GNSS speed plus pressure/temperature, with GPS ground-speed fallback.
+
+## Crew Display Outputs
+
+- Converts the same IMU, GPS, and BMP390 data path into rowing-facing values.
+- Roll state reports `Port`, `Starboard`, or `Set` from filtered roll angle.
+- Speed uses GNSS ground speed when valid and exposes meters/second, km/h, and knots.
+- Stroke rate estimates strokes per minute from cyclic IMU acceleration.
+- Temperature comes from the BMP390 compensated temperature sample.
 
 ## STM32CubeIDE Use
 
