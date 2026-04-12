@@ -94,6 +94,7 @@
 - [x] Altimeter output.
 - [x] VSI output.
 - [x] True-airspeed estimate with GPS fallback.
+- [x] G-meter output with positive and negative peak capture.
 - [ ] Add instrument validity/annunciation state per display.
 - [ ] Add unit selection where needed.
 - [ ] Add display scaling constants.

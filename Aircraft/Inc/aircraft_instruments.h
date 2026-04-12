@@ -5,6 +5,7 @@
 #include "attitude_indicator.h"
 #include "aircraft_math.h"
 #include "airspeed_indicator.h"
+#include "g_meter.h"
 #include "heading_indicator.h"
 #include "turn_slip.h"
 #include "vertical_speed_indicator.h"
@@ -45,6 +46,7 @@ typedef struct
     AltimeterData altimeter;
     VerticalSpeedData vsi;
     AirspeedData airspeed;
+    GMeterData g_meter;
 } AircraftInstrumentsOutput;
 
 typedef struct
@@ -62,6 +64,8 @@ void AircraftInstruments_Init(AircraftInstruments *inst,
 
 void AircraftInstruments_SetDeclination(AircraftInstruments *inst,
                                         float magnetic_declination_deg);
+
+void AircraftInstruments_ResetGMeterPeaks(AircraftInstruments *inst);
 
 void AircraftInstruments_Update(AircraftInstruments *inst,
                                 const AircraftInstrumentsInput *input,

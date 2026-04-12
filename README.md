@@ -125,6 +125,8 @@ This is a plain C STM32 HAL implementation for:
 - `Aircraft/Src/altimeter.c`
 - `Aircraft/Inc/airspeed_indicator.h`
 - `Aircraft/Src/airspeed_indicator.c`
+- `Aircraft/Inc/g_meter.h`
+- `Aircraft/Src/g_meter.c`
 - `Aircraft/Inc/vertical_speed_indicator.h`
 - `Aircraft/Src/vertical_speed_indicator.c`
 - `Aircraft/Inc/aircraft_math.h`
@@ -140,6 +142,7 @@ This is a plain C STM32 HAL implementation for:
 - Heading reports display heading with configurable magnetic declination.
 - Altimeter and VSI report altitude and vertical speed from BMP390 pressure and the altitude filter.
 - Airspeed reports estimated true airspeed from GNSS speed plus pressure/temperature, with GPS ground-speed fallback.
+- G-meter reports smoothed normal acceleration plus positive and negative peak G values.
 
 ## Crew Display Outputs
 
@@ -196,6 +199,10 @@ aircraft_display->heading.display_heading_deg;
 aircraft_display->altimeter.display_altitude_ft;
 aircraft_display->vsi.vertical_speed_fpm;
 aircraft_display->airspeed.display_true_airspeed_kt;
+aircraft_display->g_meter.normal_g;
+aircraft_display->g_meter.peak_positive_g;
+aircraft_display->g_meter.peak_negative_g;
+AircraftInstruments_ResetGMeterPeaks(&aircraft_instruments);
 ```
 
 The crew display values are in:

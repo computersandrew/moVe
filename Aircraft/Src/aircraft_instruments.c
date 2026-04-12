@@ -23,6 +23,7 @@ void AircraftInstruments_Init(AircraftInstruments *inst,
     Altimeter_Init(&inst->output.altimeter);
     VerticalSpeedIndicator_Init(&inst->output.vsi);
     AirspeedIndicator_Init(&inst->output.airspeed);
+    GMeter_Init(&inst->output.g_meter);
 }
 
 void AircraftInstruments_SetDeclination(AircraftInstruments *inst,
@@ -33,6 +34,15 @@ void AircraftInstruments_SetDeclination(AircraftInstruments *inst,
     }
 
     inst->magnetic_declination_deg = magnetic_declination_deg;
+}
+
+void AircraftInstruments_ResetGMeterPeaks(AircraftInstruments *inst)
+{
+    if (inst == NULL) {
+        return;
+    }
+
+    GMeter_ResetPeaks(&inst->output.g_meter);
 }
 
 void AircraftInstruments_Update(AircraftInstruments *inst,
@@ -84,6 +94,11 @@ void AircraftInstruments_Update(AircraftInstruments *inst,
                              input->air_density_valid,
                              dt_s,
                              inst->airspeed_smoothing_tau_s);
+
+    GMeter_Update(&inst->output.g_meter,
+                  input->az_g,
+                  dt_s,
+                  inst->smoothing_tau_s);
 }
 
 const AircraftInstrumentsOutput *AircraftInstruments_GetOutput(const AircraftInstruments *inst)
