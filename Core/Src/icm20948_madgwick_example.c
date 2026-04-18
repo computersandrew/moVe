@@ -47,6 +47,9 @@ HAL_StatusTypeDef Attitude_Init(void)
     config.sample_frequency_hz = 200.0f;
     config.madgwick_beta = 0.08f;
     config.magnetic_declination_deg = 0.0f;
+    config.moving_map_provider = MOVING_MAP_PROVIDER_FAA_XYZ;
+    config.moving_map_zoom = 10u;
+    config.moving_map_tile_size_px = MOVING_MAP_DEFAULT_TILE_SIZE_PX;
 
     status = NavigationFusion_Init(&navigation_fusion, &config);
     sync_legacy_outputs();

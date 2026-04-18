@@ -1,6 +1,6 @@
 # moVe
 
-High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, u-blox M10 GNSS, nRF52840 Bluetooth LE, and an RGB TFT cockpit display path. Will include non-volatile storage for datalogging, map/chart assets, and USB.
+High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, u-blox M10 GNSS, u-blox NORA-B261 Bluetooth LE, and an RGB TFT cockpit display path. Will include non-volatile storage for datalogging, map/chart assets, and USB.
 
 To include a header for possible 3.3V Lithium Ion Cells
 
@@ -14,7 +14,7 @@ This is a plain C STM32 HAL implementation for:
 - STM32H723ZG datasheet: [STMicroelectronics PDF](https://www.st.com/resource/en/datasheet/stm32h723zg.pdf).
 - Designed as a custom single board in KiCad.
 - Initial pinout draft: `docs/pinout.md`.
-- nRF52840 Bluetooth LE co-processor on a UART host link, with reset/DFU/debug lines reserved.
+- u-blox NORA-B261 Bluetooth LE module on a UART host link, with reset/recovery/test lines reserved.
 - Display direction: Newhaven `NHD-5.0-800480TF-ATXL-CTP`, driven with LTDC RGB, DMA2D, and external SDRAM.
 - Storage direction: `SDMMC2` microSD in 4-bit mode for logs and chart/map tiles.
 
@@ -49,13 +49,15 @@ This is a plain C STM32 HAL implementation for:
 - Parses both UBX binary navigation messages and NMEA sentences.
 - GPS ground speed feeds the airspeed display as a fallback speed source.
 
-## nRF52840 Bluetooth LE Co-Processor
+## u-blox NORA-B261 Bluetooth LE Module
+[Datasheet](https://content.u-blox.com/sites/default/files/documents/NORA-B26_DataSheet_UBXDOC-465451970-4608.pdf)
 
 - To run on 3.3V bus.
-- Host interface starts as asynchronous UART from STM32H723ZGT6 to nRF52840.
+- NORA-B261 uses u-connectXpress firmware with an AT-command host interface.
+- Host interface starts as asynchronous UART from STM32H723ZGT6 to NORA-B261.
 - Optional RTS/CTS hardware flow control should be reserved in the schematic.
-- Include nRF reset, DFU/boot, IRQ, and separate SWD debug access.
-- RF layout should follow Nordic guidance with antenna keepout and matching network.
+- Include NORA reset, recovery/test access, and optional IRQ/attention GPIOs.
+- The B261 variant uses an antenna pin, so route a 50 ohm 2.4 GHz RF path to a chip antenna or u.FL.
 
 ## Graphical Display Path
 [Datasheet](https://newhavendisplay.com/content/specs/NHD-5.0-800480TF-ATXL-CTP.pdf)
@@ -68,30 +70,40 @@ This is a plain C STM32 HAL implementation for:
 - Touch uses I2C plus touch interrupt/reset GPIOs.
 - Backlight needs a separate LED boost/current driver, not a direct STM32 GPIO.
 - FAA sectionals/charts should be preprocessed into raster tiles and loaded from SD instead of rendering full PDFs on the MCU.
+- Moving-map firmware maps current GNSS position to predownloaded XYZ raster tiles and can stream the current tile state over the NORA-B261 link.
+- Google Maps tiles should only be used through a licensed/offline workflow that permits embedded use; the firmware tile math is provider-neutral.
+
+## Aircraft Carbon Monoxide Sensor
+
+- Aircraft-only MQ-7/MQ-7B carbon monoxide sensor direction.
+- Firmware exposes alert triggers at 25 ppm, 50 ppm, and 100 ppm.
+- MQ-7 heater cycling is modeled as a high-temperature clean phase and low-temperature measurement phase.
+- Real CO ppm readings require analog calibration, heater driver hardware, and validation before any aircraft safety use.
 
 ## Parts List
 
 - GitHub spreadsheet/BOM: `docs/parts.csv`
 - STM32H723ZGT6 MCU
-- nRF52840 Bluetooth LE SoC or module
+- u-blox NORA-B261 Bluetooth LE module
 - U-Blox MAX-M10S GNSS receiver
 - ICM-20948 9-axis IMU
 - BMP390 pressure/temperature sensor
+- Aircraft-only MQ-7/MQ-7B carbon monoxide sensor
 - Newhaven `NHD-5.0-800480TF-ATXL-CTP` RGB TFT with capacitive touch
 - 16-bit external SDRAM for framebuffer storage
 - Backlight LED boost/current driver for the TFT
 - PCA9306 level shifter(s), if mixed-voltage I2C is kept
 - MIC5225 or equivalent low-noise LDO for 1.8 V rail
-- 3.3 V regulator sized for STM32, GNSS, nRF52840, SD, and display
+- 3.3 V regulator sized for STM32, GNSS, NORA-B261, SD, and display
 - USB-C Connector (5V 500mA)
 - SD card socket
 - Optional battery connector and protected 2-cell input path
 - ADC battery-sense divider and optional current-sense amplifier
 - GNSS antenna path: u.FL and/or ceramic patch antenna
-- nRF52840 antenna path: chip antenna, PCB antenna, or u.FL with matching network
+- NORA-B261 antenna path: chip antenna or u.FL with matching network
 - STM32 SWD header
-- nRF52840 SWD header
-- Reset and boot/DFU buttons or test pads
+- NORA-B261 reset/recovery test pads
+- Reset and boot buttons or test pads
 
 ## Files (so far) will update
 
@@ -103,6 +115,10 @@ This is a plain C STM32 HAL implementation for:
 - `Core/Src/icm20948_madgwick_example.c`
 - `Core/Inc/navigation_fusion.h`
 - `Core/Src/navigation_fusion.c`
+- `Core/Inc/moving_map.h`
+- `Core/Src/moving_map.c`
+- `Core/Inc/nora_b261.h`
+- `Core/Src/nora_b261.c`
 - `Core/Src/main.c`
 - `moVe.ioc`
 - `docs/pinout.md`
@@ -127,6 +143,8 @@ This is a plain C STM32 HAL implementation for:
 - `Aircraft/Src/airspeed_indicator.c`
 - `Aircraft/Inc/g_meter.h`
 - `Aircraft/Src/g_meter.c`
+- `Aircraft/Inc/mq7_co.h`
+- `Aircraft/Src/mq7_co.c`
 - `Aircraft/Inc/vertical_speed_indicator.h`
 - `Aircraft/Src/vertical_speed_indicator.c`
 - `Aircraft/Inc/aircraft_math.h`
@@ -161,7 +179,7 @@ Copy the `Core/Inc`, `Core/Src`, `Aircraft/Inc`, `Aircraft/Src`, `Crew/Inc`, and
 extern I2C_HandleTypeDef hi2c1;
 ```
 
-The Cube-style entry point is `Core/Src/main.c`. It shows the expected HAL init order for the H723 board direction, including I2C sensors, GPS UART, nRF UART, ADC battery sense, CRC, FMC SDRAM, DMA2D, LTDC, SDMMC2, USB OTG HS device mode with internal FS PHY, GPS UART byte reception, and the navigation fusion update loop.
+The Cube-style entry point is `Core/Src/main.c`. It shows the expected HAL init order for the H723 board direction, including I2C sensors, GPS UART, NORA-B261 UART, ADC battery sense, CRC, FMC SDRAM, DMA2D, LTDC, SDMMC2, USB OTG HS device mode with internal FS PHY, GPS UART byte reception, and the navigation fusion update loop.
 
 Legacy compatibility wrappers are still available. Call this once after `MX_I2C1_Init()`:
 
@@ -183,6 +201,22 @@ The latest Euler angles are in:
 attitude_deg.roll_deg;
 attitude_deg.pitch_deg;
 attitude_deg.yaw_deg;
+```
+
+The moving-map tile state is in:
+
+```c
+#include "navigation_fusion.h"
+
+const MovingMapState *map_state =
+    NavigationFusion_GetMovingMapState(&navigation_fusion);
+
+char nora_frame[160];
+NavigationFusion_BuildNoraB261MovingMapFrame(&navigation_fusion,
+                                             "maps/faa",
+                                             "tile",
+                                             nora_frame,
+                                             sizeof(nora_frame));
 ```
 
 The display-ready aircraft instrument values are in:

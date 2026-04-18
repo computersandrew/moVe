@@ -17,7 +17,7 @@
 - [ ] Configure system clock.
 - [x] Configure I2C for ICM-20948 and BMP390.
 - [x] Configure `USART1` asynchronous UART for MAX-M10S.
-- [x] Configure `USART3` asynchronous UART for nRF52840 Bluetooth link.
+- [x] Configure `USART3` asynchronous UART for NORA-B261 Bluetooth link.
 - [x] Configure `USB_OTG_HS` as `Device_Only` using embedded FS PHY unless an external ULPI PHY is added.
 - [x] Disable USB VBUS sensing for first bring-up or route a safe divided sense option for later.
 - [x] Configure `ADC1` battery voltage sense pin.
@@ -70,21 +70,20 @@
 - [ ] Configure navigation update rate.
 - [ ] Add UART DMA or idle-line receive path.
 - [ ] Add GPS no-fix and stale-data flags.
+- [x] Add moving-map tile coordinate state from GNSS position.
 
-## nRF52840 Bluetooth
+## NORA-B261 Bluetooth
 
-- [ ] Decide nRF52840 chip vs module.
-- [ ] Choose antenna type: PCB antenna, chip antenna, or u.FL.
-- [ ] Add nRF reset line from STM32.
-- [ ] Add nRF DFU/boot control from STM32 or test pad.
-- [ ] Add nRF IRQ/attention line to STM32.
+- [x] Decide Bluetooth hardware: u-blox NORA-B261 module.
+- [x] Decide firmware path: u-connectXpress AT-command host interface.
+- [ ] Choose antenna type: chip antenna or u.FL from the NORA-B261 antenna pin.
+- [ ] Add NORA reset line from STM32 or test pad.
+- [ ] Add NORA recovery/test access from STM32 or test pad.
+- [ ] Add NORA IRQ/attention line to STM32 if needed by the host protocol.
 - [ ] Decide whether UART RTS/CTS flow control is needed.
-- [ ] Add nRF SWD programming/debug header.
-- [ ] Add 32 MHz crystal and matching components if using bare nRF52840.
-- [ ] Add 32.768 kHz crystal if low-power BLE timing is needed.
-- [ ] Define STM32-to-nRF host protocol.
-- [ ] Add STM32 UART driver for nRF host messages.
-- [ ] Add nRF firmware project or select a Nordic connectivity firmware path.
+- [ ] Add STM32 UART driver for NORA u-connectXpress AT commands.
+- [ ] Define STM32-to-NORA message and telemetry profile.
+- [x] Add NORA-B261 moving-map telemetry frame builder.
 
 ## Aircraft Instruments
 
@@ -95,6 +94,9 @@
 - [x] VSI output.
 - [x] True-airspeed estimate with GPS fallback.
 - [x] G-meter output with positive and negative peak capture.
+- [x] MQ-7 CO alert thresholds at 25 ppm, 50 ppm, and 100 ppm.
+- [ ] Add MQ-7 heater driver hardware and ADC channel assignment.
+- [ ] Calibrate MQ-7 voltage-to-ppm conversion.
 - [ ] Add instrument validity/annunciation state per display.
 - [ ] Add unit selection where needed.
 - [ ] Add display scaling constants.
@@ -138,6 +140,7 @@
 - [ ] Implement VSI rendering.
 - [ ] Implement TAS/GS airspeed rendering.
 - [ ] Implement moving-map tile loader from SD.
+- [x] Implement moving-map tile coordinate math for preprocessed FAA/custom XYZ tiles.
 - [ ] Define chart tile preprocessing format for FAA sectionals/charts.
 - [ ] Add invalid-data annunciations.
 - [ ] Add display refresh scheduler.
@@ -181,7 +184,7 @@
 - [ ] Review SDRAM routing, address/control/data fanout, and timing constraints.
 - [ ] Review LTDC RGB routing, pixel clock, HSYNC, VSYNC, DE, and display connector pinout.
 - [ ] Review TFT backlight boost/current driver and LED return path.
-- [ ] Review nRF52840 RF layout and antenna keepout.
+- [ ] Review NORA-B261 RF layout, antenna match, and antenna keepout.
 - [ ] Confirm I2C pull-ups and voltage domains.
 - [ ] Confirm PCA9306 level shifter behavior.
 - [ ] Confirm GPS antenna path.

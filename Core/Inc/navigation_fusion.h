@@ -8,6 +8,8 @@
 #include "kalman_altitude.h"
 #include "madgwick.h"
 #include "max_m10s.h"
+#include "moving_map.h"
+#include "nora_b261.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +31,9 @@ typedef struct
     float sample_frequency_hz;
     float madgwick_beta;
     float magnetic_declination_deg;
+    MovingMapProvider moving_map_provider;
+    uint8_t moving_map_zoom;
+    uint16_t moving_map_tile_size_px;
 } NavigationFusion_Config;
 
 typedef struct
@@ -38,6 +43,7 @@ typedef struct
     MAXM10S_Parser gps_parser;
     MadgwickAHRS ahrs;
     KalmanAltitude altitude_filter;
+    MovingMap moving_map;
     AircraftInstruments aircraft_instruments;
     CrewInstruments crew_instruments;
     AttitudeDeg attitude_deg;
@@ -68,6 +74,12 @@ void NavigationFusion_SetMagneticDeclination(NavigationFusion *fusion,
 
 const AircraftInstrumentsOutput *NavigationFusion_GetAircraftDisplay(const NavigationFusion *fusion);
 const CrewInstrumentsOutput *NavigationFusion_GetCrewDisplay(const NavigationFusion *fusion);
+const MovingMapState *NavigationFusion_GetMovingMapState(const NavigationFusion *fusion);
+uint16_t NavigationFusion_BuildNoraB261MovingMapFrame(const NavigationFusion *fusion,
+                                                      const char *map_root,
+                                                      const char *map_extension,
+                                                      char *frame,
+                                                      uint16_t frame_size);
 const AttitudeDeg *NavigationFusion_GetAttitude(const NavigationFusion *fusion);
 const BMP390_Sample *NavigationFusion_GetBaroSample(const NavigationFusion *fusion);
 const MAXM10S_NavSample *NavigationFusion_GetGpsSample(const NavigationFusion *fusion);

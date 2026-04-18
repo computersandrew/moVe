@@ -5,6 +5,7 @@
 
 #define NAV_FUSION_DEFAULT_SAMPLE_HZ      200.0f
 #define NAV_FUSION_DEFAULT_BETA           0.08f
+#define NAV_FUSION_DEFAULT_MAP_ZOOM       10u
 
 static float positive_or_default(float value, float default_value)
 {
@@ -55,6 +56,7 @@ HAL_StatusTypeDef NavigationFusion_Init(NavigationFusion *fusion,
                                         const NavigationFusion_Config *config)
 {
     HAL_StatusTypeDef status;
+    MovingMapConfig moving_map_config;
     float sample_frequency_hz;
     float beta;
 
@@ -96,6 +98,16 @@ HAL_StatusTypeDef NavigationFusion_Init(NavigationFusion *fusion,
 
     Madgwick_Init(&fusion->ahrs, sample_frequency_hz, beta);
     MAXM10S_Init(&fusion->gps_parser);
+    moving_map_config.provider =
+        (config->moving_map_provider == MOVING_MAP_PROVIDER_NONE) ?
+        MOVING_MAP_PROVIDER_FAA_XYZ : config->moving_map_provider;
+    moving_map_config.zoom =
+        (config->moving_map_zoom > 0u) ? config->moving_map_zoom :
+        NAV_FUSION_DEFAULT_MAP_ZOOM;
+    moving_map_config.tile_size_px =
+        (config->moving_map_tile_size_px > 0u) ?
+        config->moving_map_tile_size_px : MOVING_MAP_DEFAULT_TILE_SIZE_PX;
+    MovingMap_Init(&fusion->moving_map, &moving_map_config);
     AircraftInstruments_Init(&fusion->aircraft_instruments,
                              config->magnetic_declination_deg);
     CrewInstruments_Init(&fusion->crew_instruments);
@@ -175,6 +187,7 @@ HAL_StatusTypeDef NavigationFusion_Update(NavigationFusion *fusion)
                           fusion->baro_sample.altitude_m,
                           baro_measurement_valid,
                           dt_s);
+    (void)MovingMap_UpdateFromGps(&fusion->moving_map, &fusion->gps_sample);
 
     fill_aircraft_input(fusion, &imu_sample, baro_display_valid, &aircraft_input);
     AircraftInstruments_Update(&fusion->aircraft_instruments, &aircraft_input, dt_s);
@@ -243,6 +256,48 @@ const CrewInstrumentsOutput *NavigationFusion_GetCrewDisplay(const NavigationFus
     }
 
     return CrewInstruments_GetOutput(&fusion->crew_instruments);
+}
+
+const MovingMapState *NavigationFusion_GetMovingMapState(const NavigationFusion *fusion)
+{
+    if (fusion == NULL) {
+        return NULL;
+    }
+
+    return MovingMap_GetState(&fusion->moving_map);
+}
+
+uint16_t NavigationFusion_BuildNoraB261MovingMapFrame(const NavigationFusion *fusion,
+                                                      const char *map_root,
+                                                      const char *map_extension,
+                                                      char *frame,
+                                                      uint16_t frame_size)
+{
+    char tile_path[96];
+    const MovingMapState *map_state;
+
+    if ((fusion == NULL) || (frame == NULL) || (frame_size == 0u)) {
+        return 0u;
+    }
+
+    map_state = MovingMap_GetState(&fusion->moving_map);
+    if ((map_state == NULL) || (map_state->valid == 0u)) {
+        return 0u;
+    }
+
+    if (MovingMap_BuildTilePath(map_state,
+                                map_root,
+                                map_extension,
+                                tile_path,
+                                sizeof(tile_path)) == 0u) {
+        tile_path[0] = '\0';
+    }
+
+    return NORA_B261_BuildMovingMapFrame(&fusion->gps_sample,
+                                         map_state,
+                                         tile_path,
+                                         frame,
+                                         frame_size);
 }
 
 const AttitudeDeg *NavigationFusion_GetAttitude(const NavigationFusion *fusion)

@@ -12,14 +12,15 @@ This is the current pin/peripheral plan from `moVe.ioc`. CubeMX should remain th
 | --- | --- | --- | --- |
 | ICM-20948 + BMP390 | `I2C1` | `PB6` SCL, `PB7` SDA | Use correct pull-up voltage for the bus domain. |
 | MAX-M10S GNSS | `USART1` | `PB14` TX, `PB15` RX | Asynchronous UART, 8N1. STM32 TX to GPS RX, GPS TX to STM32 RX. |
-| nRF52840 Bluetooth | `USART3` | `PC10` TX, `PB11` RX | Asynchronous UART, 8N1. Reserve RTS/CTS if high-rate telemetry needs flow control. |
-| nRF52840 control | GPIO | TBD | Add `NRF_RESET_N`, `NRF_BOOT_DFU`, and optional `NRF_IRQ`. |
+| NORA-B261 Bluetooth | `USART3` | `PC10` TX, `PB11` RX | Asynchronous UART, 8N1 AT-command host link. Reserve RTS/CTS if high-rate telemetry needs flow control. |
+| NORA-B261 control | GPIO | TBD | Add reset, recovery/test access, and optional IRQ/attention GPIOs. |
 | SD card | `SDMMC2` | CubeMX-selected 4-bit bus | Use `SD 4 bits Wide bus`; do not enable auto-direction voltage converter unless a matching external translator is added. |
 | Display | `LTDC` | RGB TFT interface | Newhaven `NHD-5.0-800480TF-ATXL-CTP`, 800x480, parallel RGB, I2C capacitive touch. |
 | Graphics acceleration | `DMA2D` | Enable | Use for framebuffer fills, blits, and pixel format conversion. |
 | Framebuffer memory | `FMC` | `SDRAM 1`, `SDCKE0 + SDNE0`, 16-bit data | Choose the final SDRAM IC before locking row/column/timing values. |
 | Chart/log storage | `SDMMC2` + FatFs | Enable later | Store chart/map tiles and logs on microSD. |
 | Battery monitor | `ADC1` | `PC4 / ADC1_INP4` | Use a resistor divider; do not feed pack voltage directly into the MCU. |
+| Aircraft CO sensor | ADC + GPIO/PWM | TBD | MQ-7 analog output plus heater-control hardware for high/low heater cycle. |
 | USB-C device/power | `USB_OTG_HS` | Device-only, embedded FS PHY if no ULPI PHY | Use USB-C VBUS for bring-up power through protection and regulators. VBUS sensing can be disabled in CubeMX for now. |
 | Debug | `SWD` | `PA13` SWDIO, `PA14` SWCLK | Add `NRST`, 3V3, GND, and optional `PB3` SWO. |
 
@@ -82,28 +83,26 @@ Hardware notes:
 
 ## Bluetooth Co-Processor
 
-Use an nRF52840 as a Bluetooth LE co-processor on the board. Initial host link is asynchronous UART because it is simple and maps cleanly into STM32 firmware. SPI can be reserved if higher throughput is needed later, but it is not needed for first bring-up.
+Use a u-blox NORA-B261 Bluetooth LE module on the board. The NORA-B261 is the u-connectXpress variant with an antenna pin, so the STM32 should treat it as an AT-command Bluetooth co-processor over UART. Initial host link is asynchronous UART because it is simple and maps cleanly into STM32 firmware. SPI is not needed for first bring-up.
 
-| nRF52840 Signal | STM32 Pin | Notes |
+| NORA-B261 Signal | STM32 Pin | Notes |
 | --- | --- | --- |
-| nRF UART RX | `PC10 / USART3_TX` | STM32 to nRF52840. |
-| nRF UART TX | `PB11 / USART3_RX` | nRF52840 to STM32. |
-| nRF RTS | GPIO TBD | Optional flow control; reserve if routing allows. |
-| nRF CTS | GPIO TBD | Optional flow control; reserve if routing allows. |
-| nRF RESET_N | GPIO TBD | Strongly recommended. |
-| nRF BOOT/DFU | GPIO TBD | Recommended for firmware update/recovery. |
-| nRF IRQ | GPIO TBD | Optional host wake/attention line. |
-| nRF SWDIO | nRF debug header | Program/debug nRF52840 separately. |
-| nRF SWDCLK | nRF debug header | Program/debug nRF52840 separately. |
+| NORA UART RX | `PC10 / USART3_TX` | STM32 to NORA-B261. |
+| NORA UART TX | `PB11 / USART3_RX` | NORA-B261 to STM32. |
+| NORA RTS | GPIO TBD | Optional flow control; reserve if routing allows. |
+| NORA CTS | GPIO TBD | Optional flow control; reserve if routing allows. |
+| NORA RESET_N | GPIO TBD | Strongly recommended. |
+| NORA recovery/test | GPIO or test pad TBD | Recommended for firmware update/recovery access. |
+| NORA IRQ/attention | GPIO TBD | Optional host wake/attention line if used by the host protocol. |
+| NORA ANT | 2.4 GHz RF path | Route as 50 ohm controlled impedance to chip antenna or u.FL with matching network. |
 
-nRF52840 hardware notes:
+NORA-B261 hardware notes:
 
-- Add the Nordic-recommended 32 MHz crystal and matching/load capacitors if required by the chosen reference design.
-- Add a 32.768 kHz crystal if low-power BLE timing needs it.
-- Follow Nordic RF layout guidance closely: antenna keepout, matching network, short feed, ground stitching.
-- Decide chip antenna, PCB antenna, or u.FL.
-- Keep a dedicated nRF SWD header or tag-connect footprint.
+- Use the u-blox module land pattern and keepout guidance instead of a bare-radio RF reference layout.
+- Route the antenna pin through a short 50 ohm RF path with matching network access.
+- Decide chip antenna or u.FL before PCB layout.
 - Consider UART hardware flow control if high-rate telemetry will be streamed.
+- Expose reset and recovery/test access for bring-up and module firmware recovery.
 
 ## USB-C
 
@@ -130,8 +129,20 @@ The first board can power from USB-C VBUS. If adding a two-cell lithium pack lat
 | Battery voltage monitor | Resistor divider into `PC4 / ADC1_INP4`. |
 | Current monitor | Optional shunt/current-sense amplifier. |
 | Backlight supply | Separate LED boost/current driver for the Newhaven backlight. |
-| 3.3 V rail | STM32, GNSS, nRF52840, BMP390, touch, SD, and display logic. |
+| 3.3 V rail | STM32, GNSS, NORA-B261, BMP390, touch, SD, and display logic. |
 | 1.8 V rail | ICM-20948 if kept at 1.8 V. |
+
+## Aircraft Carbon Monoxide Sensor
+
+Use an MQ-7/MQ-7B only for the aircraft build variant. The sensor needs a heater driver that can provide the high-temperature clean phase and low-temperature measurement phase, plus an analog output routed to an ADC channel.
+
+| MQ-7 Function | STM32 / Board Connection | Notes |
+| --- | --- | --- |
+| Analog output | ADC TBD | Add input scaling/filtering so the ADC never exceeds the STM32 analog range. |
+| Heater high/low drive | GPIO/PWM + external driver TBD | Do not drive the heater directly from an STM32 GPIO. |
+| Sensor supply/load resistor | Analog front end TBD | Select load resistor and calibration path during schematic work. |
+
+Firmware thresholds are 25 ppm, 50 ppm, and 100 ppm; real ppm accuracy depends on heater timing, calibration, temperature/humidity behavior, and sensor placement.
 
 ## SD Card
 
@@ -217,15 +228,16 @@ Pick the exact SDRAM part before finalizing row bits, column bits, CAS latency, 
 | NRST | `NRST` | STM32 reset. |
 | BOOT0 | `BOOT0` | Add pulldown and optional boot strap/test point. |
 
-Add separate debug access for the nRF52840.
+Expose NORA-B261 reset/recovery test access. A separate BLE SWD header is not part of the u-connectXpress module bring-up path.
 
 ## Open Pin Decisions
 
 - Final LTDC timing values for the Newhaven panel.
 - Exact SDRAM part number and timing values.
-- nRF52840 GPIO choices for reset, DFU, IRQ, RTS, and CTS.
+- NORA-B261 GPIO choices for reset, recovery/test, IRQ, RTS, and CTS.
 - GPS TIMEPULSE and reset pins.
 - IMU and BMP390 interrupt pins.
+- MQ-7 ADC and heater-control pins for aircraft variant only.
 - SD card detect pin.
 - USB VBUS sense option.
 - Power tree and voltage domains for sensor I2C.

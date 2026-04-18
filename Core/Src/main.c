@@ -31,6 +31,9 @@ static void NavigationFusion_AppInit(void)
     config.sample_frequency_hz = 200.0f;
     config.madgwick_beta = 0.08f;
     config.magnetic_declination_deg = 0.0f;
+    config.moving_map_provider = MOVING_MAP_PROVIDER_FAA_XYZ;
+    config.moving_map_zoom = 10u;
+    config.moving_map_tile_size_px = MOVING_MAP_DEFAULT_TILE_SIZE_PX;
 
     if (NavigationFusion_Init(&navigation_fusion, &config) != HAL_OK) {
         Error_Handler();
