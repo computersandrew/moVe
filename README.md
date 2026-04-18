@@ -3,7 +3,9 @@
 High-performance (ish) STM32H7 sensor suite and navigation platform for autonomous drones, planes, cars, and boats. Featuring ICM-20948, BMP390, u-blox M10 GNSS, u-blox NORA-B261 Bluetooth LE, and an RGB TFT cockpit display path. Will include non-volatile storage for datalogging, map/chart assets, and USB.
 
 PCB Hardware Design and Implementation done using Ki-Cad
+
 3D Design and Modeling done using Siemens NX
+
 Prototyping & Manufacturing done at Rensselaer Polytechnic Institute
 
 To include a header for possible 3.3V LiPo Cells
