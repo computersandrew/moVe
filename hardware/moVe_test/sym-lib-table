@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "moVe")(type "KiCad")(uri "${KIPRJMOD}/moVe.kicad_sym")(options "")(descr "moVe project symbols"))
+)

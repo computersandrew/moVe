@@ -1,0 +1,295 @@
+(kicad_sch
+  (version 20230121)
+  (generator eeschema)
+  (uuid "ff9a93c0-eeea-58df-a9c3-24ab72ffa116")
+  (paper "A4")
+  (title_block
+    (title "moVe test platform - top level")
+    (date "2026-11-26")
+    (rev "A")
+    (company "moVe - RPI")
+    (comment 1 "4.2 in (106.68 mm) round test platform, 4 layers")
+  )
+  (lib_symbols)
+  (sheet
+    (at 25.4 45.72)
+    (size 50.8 25.4)
+    (fields_autoplaced)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (color 0 0 0 0)
+    )
+    (uuid "51cfea56-d013-5c03-beef-d5c1bb31b082")
+    (property "Sheetname" "Power"
+      (at 25.4 45.02 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "power.kicad_sch"
+      (at 25.4 71.72 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left top)
+      )
+    )
+    (instances
+      (project "moVe_test"
+        (path "/ff9a93c0-eeea-58df-a9c3-24ab72ffa116"
+          (page "2")
+        )
+      )
+    )
+  )
+  (sheet
+    (at 91.44 45.72)
+    (size 50.8 25.4)
+    (fields_autoplaced)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (color 0 0 0 0)
+    )
+    (uuid "47009bfa-d2f4-59cc-8556-3ed729a8badc")
+    (property "Sheetname" "MCU"
+      (at 91.44 45.02 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "mcu.kicad_sch"
+      (at 91.44 71.72 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left top)
+      )
+    )
+    (instances
+      (project "moVe_test"
+        (path "/ff9a93c0-eeea-58df-a9c3-24ab72ffa116"
+          (page "3")
+        )
+      )
+    )
+  )
+  (sheet
+    (at 157.48 45.72)
+    (size 50.8 25.4)
+    (fields_autoplaced)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (color 0 0 0 0)
+    )
+    (uuid "16fa0e04-6409-5b27-9b3f-d6cd0868235b")
+    (property "Sheetname" "Memory"
+      (at 157.48 45.02 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "memory.kicad_sch"
+      (at 157.48 71.72 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left top)
+      )
+    )
+    (instances
+      (project "moVe_test"
+        (path "/ff9a93c0-eeea-58df-a9c3-24ab72ffa116"
+          (page "4")
+        )
+      )
+    )
+  )
+  (sheet
+    (at 223.52 45.72)
+    (size 50.8 25.4)
+    (fields_autoplaced)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (color 0 0 0 0)
+    )
+    (uuid "4b4146ac-c3f4-5063-ab10-2e75e2dca16e")
+    (property "Sheetname" "Display"
+      (at 223.52 45.02 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "display.kicad_sch"
+      (at 223.52 71.72 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left top)
+      )
+    )
+    (instances
+      (project "moVe_test"
+        (path "/ff9a93c0-eeea-58df-a9c3-24ab72ffa116"
+          (page "5")
+        )
+      )
+    )
+  )
+  (sheet
+    (at 25.4 91.44)
+    (size 50.8 25.4)
+    (fields_autoplaced)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (color 0 0 0 0)
+    )
+    (uuid "4c620f43-5e3f-5ef5-af73-e277a136d49a")
+    (property "Sheetname" "Sensors"
+      (at 25.4 90.74 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sensors.kicad_sch"
+      (at 25.4 117.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left top)
+      )
+    )
+    (instances
+      (project "moVe_test"
+        (path "/ff9a93c0-eeea-58df-a9c3-24ab72ffa116"
+          (page "6")
+        )
+      )
+    )
+  )
+  (sheet
+    (at 91.44 91.44)
+    (size 50.8 25.4)
+    (fields_autoplaced)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (color 0 0 0 0)
+    )
+    (uuid "2a013b01-de9c-52af-a78c-e92325ea4cf7")
+    (property "Sheetname" "Radio"
+      (at 91.44 90.74 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "radio.kicad_sch"
+      (at 91.44 117.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left top)
+      )
+    )
+    (instances
+      (project "moVe_test"
+        (path "/ff9a93c0-eeea-58df-a9c3-24ab72ffa116"
+          (page "7")
+        )
+      )
+    )
+  )
+  (sheet
+    (at 157.48 91.44)
+    (size 50.8 25.4)
+    (fields_autoplaced)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (color 0 0 0 0)
+    )
+    (uuid "bb6a021b-58a7-5f85-9d9b-45b6551c31a2")
+    (property "Sheetname" "CO_Sensor"
+      (at 157.48 90.74 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "co_sensor.kicad_sch"
+      (at 157.48 117.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left top)
+      )
+    )
+    (instances
+      (project "moVe_test"
+        (path "/ff9a93c0-eeea-58df-a9c3-24ab72ffa116"
+          (page "8")
+        )
+      )
+    )
+  )
+  (text "moVe TEST PLATFORM - 4.2 in (106.68 mm) round PCB\nStackup (4 layers, 1.6 mm): L1 signal | L2 solid GND | L3 +3V3 plane | L4 signal\nSheet-local nets use plain labels; nets shared between sheets use global labels.\nFirmware: PWR_LDO_SUPPLY, HSE 25 MHz, LSE 32.768 kHz, ICM-20948 at 0x69. See README_moVe_test.md."
+    (at 25.4 152.4 0)
+    (effects
+      (font
+        (size 2 2)
+      )
+      (justify left bottom)
+    )
+    (uuid "a2125ec7-241c-515d-91f4-b1fdbd714935")
+  )
+  (sheet_instances
+    (path "/"
+      (page "1")
+    )
+  )
+)

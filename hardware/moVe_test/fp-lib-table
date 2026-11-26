@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "moVe")(type "KiCad")(uri "${KIPRJMOD}/moVe.pretty")(options "")(descr "moVe project footprints"))
+)

@@ -19,10 +19,34 @@ This is a plain C STM32 HAL implementation for:
 - Main MCU: STM32H723ZGT6.
 - STM32H723ZG datasheet: [STMicroelectronics PDF](https://www.st.com/resource/en/datasheet/stm32h723zg.pdf).
 - Designed as a custom single board in KiCad.
-- Initial pinout draft: `docs/pinout.md`.
+- Pinout: `docs/pinout.md`.
+- KiCad test platform PCB: `hardware/moVe_test/` (schematic, routed 4-layer board, images).
 - u-blox NORA-B261 Bluetooth LE module on a UART host link, with reset/recovery/test lines reserved.
 - Display direction: Newhaven `NHD-5.0-800480TF-ATXL-CTP`, driven with LTDC RGB, DMA2D, and external SDRAM.
 - Storage direction: `SDMMC2` microSD in 4-bit mode for logs and chart/map tiles.
+
+## Test Platform PCB (KiCad)
+
+A round **4.2 in (106.68 mm), 4-layer** bring-up board that carries every subsystem below lives in
+[`hardware/moVe_test/`](hardware/moVe_test/) — full KiCad project, schematic PDF, layer images and design notes.
+
+- **Fully routed:** 521/521 connections, DRC 0 errors, 146 parts.
+- **Stackup:** signal / solid GND / +3V3 plane / signal (1.6 mm).
+- **Schematic:** 7 sheets (Power, MCU, Memory, Display, Sensors, Radio, CO sensor), each organized into titled functional blocks — [PDF](hardware/moVe_test/moVe_test_schematic.pdf).
+- **Pin assignments:** previously TBD pins are now assigned in [`docs/pinout.md`](docs/pinout.md).
+
+<p align="center">
+  <img src="hardware/moVe_test/images/board_top.png" width="45%" alt="moVe test platform, top side">
+  <img src="hardware/moVe_test/images/board_copper.png" width="45%" alt="moVe test platform, top and bottom copper">
+</p>
+
+<p align="center">
+  <img src="hardware/moVe_test/images/sch_2_power.png" width="45%" alt="Power sheet">
+  <img src="hardware/moVe_test/images/sch_3_mcu.png" width="45%" alt="MCU sheet">
+</p>
+
+See [`hardware/moVe_test/README.md`](hardware/moVe_test/README.md) for all layers, every schematic sheet, the
+stackup rationale, design notes and how to regenerate the files.
 
 ## ICM-20948 + Madgwick AHRS for STM32H7
 [Datasheet](https://d17t6iyxenbwp1.cloudfront.net/s3fs-public/2026-01/DS-000189-ICM-20948-v1.6.pdf?VersionId=XteIUeEiGGKWJDQjSzr3D2K3OIitFvHY)

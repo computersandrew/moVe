@@ -13,14 +13,14 @@ This is the current pin/peripheral plan from `moVe.ioc`. CubeMX should remain th
 | ICM-20948 + BMP390 | `I2C1` | `PB6` SCL, `PB7` SDA | Use correct pull-up voltage for the bus domain. |
 | MAX-M10S GNSS | `USART1` | `PB14` TX, `PB15` RX | Asynchronous UART, 8N1. STM32 TX to GPS RX, GPS TX to STM32 RX. |
 | NORA-B261 Bluetooth | `USART3` | `PC10` TX, `PB11` RX | Asynchronous UART, 8N1 AT-command host link. Reserve RTS/CTS if high-rate telemetry needs flow control. |
-| NORA-B261 control | GPIO | TBD | Add reset, recovery/test access, and optional IRQ/attention GPIOs. |
+| NORA-B261 control | GPIO + `USART3` flow control | `PD13` RESET_N, `PD4` SWITCH_1, `PD5` SWITCH_2, `PC12` WAKE, `PD11` CTS, `PD12` RTS | Assigned on the KiCad test platform (`hardware/moVe_test`). |
 | SD card | `SDMMC2` | CubeMX-selected 4-bit bus | Use `SD 4 bits Wide bus`; do not enable auto-direction voltage converter unless a matching external translator is added. |
 | Display | `LTDC` | RGB TFT interface | Newhaven `NHD-5.0-800480TF-ATXL-CTP`, 800x480, parallel RGB, I2C capacitive touch. |
 | Graphics acceleration | `DMA2D` | Enable | Use for framebuffer fills, blits, and pixel format conversion. |
 | Framebuffer memory | `FMC` | `SDRAM 1`, `SDCKE0 + SDNE0`, 16-bit data | Choose the final SDRAM IC before locking row/column/timing values. |
 | Chart/log storage | `SDMMC2` + FatFs | Enable later | Store chart/map tiles and logs on microSD. |
 | Battery monitor | `ADC1` | `PC4 / ADC1_INP4` | Use a resistor divider; do not feed pack voltage directly into the MCU. |
-| Aircraft CO sensor | ADC + GPIO/PWM | TBD | MQ-7 analog output plus heater-control hardware for high/low heater cycle. |
+| Aircraft CO sensor | ADC + PWM | `PC5 / ADC12_INP8` sense, `PB9 / TIM17_CH1` heater | AO3400A low-side heater switch; 10k/20k divider into the ADC. |
 | USB-C device/power | `USB_OTG_HS` | Device-only, embedded FS PHY if no ULPI PHY | Use USB-C VBUS for bring-up power through protection and regulators. VBUS sensing can be disabled in CubeMX for now. |
 | Debug | `SWD` | `PA13` SWDIO, `PA14` SWCLK | Add `NRST`, 3V3, GND, and optional `PB3` SWO. |
 
@@ -51,14 +51,14 @@ Use one shared I2C bus for the pressure and inertial sensors:
 | ICM-20948 | SDA | `PB7 / I2C1_SDA` | Check voltage domain. |
 | BMP390 | SCL | `PB6 / I2C1_SCL` | Same bus as IMU. |
 | BMP390 | SDA | `PB7 / I2C1_SDA` | Same bus as IMU. |
-| ICM-20948 | INT | GPIO TBD | Optional data-ready interrupt. |
-| BMP390 | INT | GPIO TBD | Optional data-ready interrupt. |
+| ICM-20948 | INT | `PE3` (EXTI3) | 1.8 V INT shifted to 3.3 V with a BSS138. |
+| BMP390 | INT | `PB4` (EXTI4) | Data-ready interrupt. |
 
 Address plan:
 
 | Device | Address |
 | --- | --- |
-| ICM-20948 | `0x68` default, `0x69` if AD0 high |
+| ICM-20948 | `0x69` on the test platform (AD0 tied high); `0x68` if AD0 low |
 | BMP390 | `0x76` default, `0x77` if SDO high |
 
 Power note: if the ICM-20948 is kept on a 1.8 V bus while the BMP390 is on 3.3 V, do not place them on the same I2C segment without level shifting. A cleaner design is either all sensor I2C at one compatible voltage or separate I2C buses per voltage domain.
@@ -71,9 +71,9 @@ MAX-M10S is handled as a UART byte stream. The parser supports UBX binary and NM
 | --- | --- | --- |
 | TXD | `PB15 / USART1_RX` | GPS to STM32. |
 | RXD | `PB14 / USART1_TX` | STM32 to GPS for UBX config. |
-| TIMEPULSE | GPIO TBD | Optional PPS/timepulse input. |
-| EXTINT | GPIO TBD | Optional wake/interrupt. |
-| RESET_N | GPIO TBD | Optional reset control. |
+| TIMEPULSE | `PE2` (EXTI2) | PPS/timepulse input. |
+| EXTINT | `PG14` | Wake/interrupt output from STM32. |
+| RESET_N | `PG3` | Reset control. |
 
 Hardware notes:
 
@@ -89,11 +89,11 @@ Use a u-blox NORA-B261 Bluetooth LE module on the board. The NORA-B261 is the u-
 | --- | --- | --- |
 | NORA UART RX | `PC10 / USART3_TX` | STM32 to NORA-B261. |
 | NORA UART TX | `PB11 / USART3_RX` | NORA-B261 to STM32. |
-| NORA RTS | GPIO TBD | Optional flow control; reserve if routing allows. |
-| NORA CTS | GPIO TBD | Optional flow control; reserve if routing allows. |
-| NORA RESET_N | GPIO TBD | Strongly recommended. |
-| NORA recovery/test | GPIO or test pad TBD | Recommended for firmware update/recovery access. |
-| NORA IRQ/attention | GPIO TBD | Optional host wake/attention line if used by the host protocol. |
+| NORA RTS | `PD11 / USART3_CTS` | NORA RTS (F8) → STM32 CTS. |
+| NORA CTS | `PD12 / USART3_RTS` | STM32 RTS → NORA CTS (F9). |
+| NORA RESET_N | `PD13` | Also on a test pad. |
+| NORA recovery/test | `PD4` SWITCH_1, `PD5` SWITCH_2 | SWITCH_1 also on a test pad; DBG_TX on a test pad. |
+| NORA WAKE (GPIO_J9) | `PC12` | Shared with expansion header pin 7. |
 | NORA ANT | 2.4 GHz RF path | Route as 50 ohm controlled impedance to chip antenna or u.FL with matching network. |
 
 NORA-B261 hardware notes:
@@ -114,7 +114,7 @@ Use USB-C as a device connection and interim 5 V board power source.
 | D+ | `PA12 / USB_OTG_HS_DP` | Use the embedded FS PHY path unless adding ULPI. Route as a USB differential pair. |
 | CC1/CC2 | `5.1 kOhm` pulldowns to GND | Required for USB-C sink/device attach behavior. |
 | VBUS | Power input path | Route through fuse/eFuse/protection into the regulator tree. |
-| VBUS sense | GPIO/ADC/USB sense pin TBD | Optional for now; do not connect 5 V directly to a random GPIO. |
+| VBUS sense | `PA9 / USB_OTG_HS_VBUS` | 10k/20k divider (5 V → 3.3 V). |
 
 CubeMX can leave VBUS sensing disabled during first bring-up if the board is powered from the same USB connector. Add a resistor divider, jumper, or test option if firmware should detect USB presence later.
 
@@ -138,9 +138,9 @@ Use an MQ-7/MQ-7B only for the aircraft build variant. The sensor needs a heater
 
 | MQ-7 Function | STM32 / Board Connection | Notes |
 | --- | --- | --- |
-| Analog output | ADC TBD | Add input scaling/filtering so the ADC never exceeds the STM32 analog range. |
-| Heater high/low drive | GPIO/PWM + external driver TBD | Do not drive the heater directly from an STM32 GPIO. |
-| Sensor supply/load resistor | Analog front end TBD | Select load resistor and calibration path during schematic work. |
+| Analog output | `PC5 / ADC12_INP8` | 10k/20k divider + 100 nF so 5 V full scale stays under 3.3 V. |
+| Heater high/low drive | `PB9 / TIM17_CH1` → AO3400A | 100R gate resistor, 100k gate pull-down; heater from +5V (USB). |
+| Sensor supply/load resistor | +5V, RL = 10k | Calibrate RL/R0 during bring-up. |
 
 Firmware thresholds are 25 ppm, 50 ppm, and 100 ppm; real ppm accuracy depends on heater timing, calibration, temperature/humidity behavior, and sensor placement.
 
@@ -156,7 +156,7 @@ Use `SDMMC2` because that is the SDMMC instance CubeMX exposed cleanly for the S
 | D3 | `PG12 / SDMMC2_D3` | 4-bit SDMMC. |
 | CK | `PD6 / SDMMC2_CK` | Controlled impedance/routing care. |
 | CMD | `PA0 / SDMMC2_CMD` | Pull-up per SD requirements. |
-| CD | GPIO TBD | Optional card detect. |
+| CD | `PC8` (EXTI8) | 10k pull-up. |
 
 Do not use the auto-direction voltage converter mode unless the schematic includes the matching external SD voltage translator.
 
@@ -194,11 +194,11 @@ Current display direction: Newhaven `NHD-5.0-800480TF-ATXL-CTP`.
 | `HSD` | `PC6 / LTDC_HSYNC` | Horizontal sync. |
 | `VSD` | `PA4 / LTDC_VSYNC` | Vertical sync. |
 | `DEN` | `PF10 / LTDC_DE` | Display enable. |
-| `STBYB` | GPIO TBD | Display standby control. |
+| `STBYB` | `PB13` | 10k pull-down keeps the panel in standby until enabled. |
 | `LED+ / LED-` | Backlight LED driver | Do not drive directly from STM32. |
-| Touch SCL/SDA | I2C bus TBD | Capacitive touch interface. |
-| Touch `/INT` | GPIO EXTI TBD | Touch interrupt. |
-| Touch `/RESET` | GPIO output TBD | Touch reset. |
+| Touch SCL/SDA | `PB6 / PB7` (`I2C1`, 3.3 V) | FT5426 at 7-bit address 0x38. |
+| Touch `/INT` | `PC13` (EXTI13) | 10k pull-up. |
+| Touch `/RESET` | `PB12` | 10k pull-up. |
 
 The physical panel interface is 24-bit RGB, but the first framebuffer should use `RGB565` in SDRAM to reduce memory bandwidth and capacity pressure.
 
@@ -232,12 +232,19 @@ Expose NORA-B261 reset/recovery test access. A separate BLE SWD header is not pa
 
 ## Open Pin Decisions
 
-- Final LTDC timing values for the Newhaven panel.
-- Exact SDRAM part number and timing values.
-- NORA-B261 GPIO choices for reset, recovery/test, IRQ, RTS, and CTS.
-- GPS TIMEPULSE and reset pins.
+Resolved on the KiCad test platform (`hardware/moVe_test`, see its README):
+
+- NORA-B261 reset, recovery/test, wake, RTS and CTS pins.
+- GPS TIMEPULSE, EXTINT and reset pins.
 - IMU and BMP390 interrupt pins.
-- MQ-7 ADC and heater-control pins for aircraft variant only.
+- MQ-7 ADC and heater-control pins (aircraft variant).
 - SD card detect pin.
-- USB VBUS sense option.
-- Power tree and voltage domains for sensor I2C.
+- USB VBUS sense (`PA9` via divider).
+- Sensor I2C voltage domains: BMP390 and touch on 3.3 V `I2C1`; ICM-20948 on a 1.8 V segment behind a PCA9306.
+- Backlight dimming: `PB8 / TIM16_CH1` → TPS61165 CTRL. Status LEDs: `PF6`, `PF7`. Unused: `PD7`, `PB2`.
+
+Still open:
+
+- Final LTDC timing values for the Newhaven panel.
+- SDRAM timing values for the fitted AS4C4M16SA (the footprint also accepts the 32 MB MT48LC16M16A2).
+- Update `moVe.ioc` in CubeMX to match these assignments.
