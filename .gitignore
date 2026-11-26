@@ -21,3 +21,11 @@ cmake-build-*/
 # Local/editor files
 .DS_Store
 *.swp
+
+# KiCad local/backup files
+*-backups/
+*.kicad_prl
+*.lck
+fp-info-cache
+_autosave-*
+*.bak
