@@ -34,6 +34,7 @@ A round **4.2 in (106.68 mm), 4-layer** bring-up board that carries every subsys
 - **Stackup:** signal / solid GND / +3V3 plane / signal (1.6 mm).
 - **Schematic:** 7 sheets (Power, MCU, Memory, Display, Sensors, Radio, CO sensor), each organized into titled functional blocks — [PDF](hardware/moVe_test/moVe_test_schematic.pdf).
 - **Pin assignments:** previously TBD pins are now assigned in [`docs/pinout.md`](docs/pinout.md).
+- **Cost:** about $142 per board ($77 components + $64 display + PCB), with a priced BOM in [`bom/moVe_test_BOM.csv`](hardware/moVe_test/bom/moVe_test_BOM.csv).
 
 <p align="center">
   <img src="hardware/moVe_test/images/board_top.png" width="45%" alt="moVe test platform, top side">

@@ -103,6 +103,25 @@ generating firmware.
 
 PD7 and PB2 are left unused.
 
+## Bill of materials and cost
+
+Full BOM with quantities, MPNs, unit prices and DigiKey links: [`bom/moVe_test_BOM.csv`](bom/moVe_test_BOM.csv) (61 lines, 130 fitted parts).
+
+| | Per board (USD) |
+|---|---|
+| Components (excluding display) | $76.57 |
+| Display — NHD-5.0-800480TF-ATXL-CTP (off-board) | $63.83 |
+| PCB fabrication, 4-layer (estimate) | $2.00 |
+| **Total** | **$142.40** |
+
+About $712 for a 5-board build. Prices are quantity-1, USD, without shipping or tariffs, as of Nov 2026.
+
+* Most ICs and connectors come from the April 2026 prices in [`docs/parts.csv`](../../docs/parts.csv); the rest are distributor prices from Nov 2026 (the source is in the `Price basis` column).
+* Passives, LEDs, the small MOSFETs and diodes, and the 1x8 header are estimates assuming 10+ cut-tape quantities. At single-piece prices (~$0.10 each) they add about $8 per board.
+* For the generic passives, the link is a DigiKey search by value and package; choose a specific part before ordering.
+* PCB cost is a placeholder; get a real quote by uploading the Gerbers.
+* The display spec calls out a Molex FPC connector; J6 is a Hirose FH12-40S. Check the contact side before ordering.
+
 ## Design notes worth checking
 
 * **Power:** USB-C VBUS → 1.1 A PTC → `+5V` (MQ-7 heater) → SS34 → `VSYS`; 2S battery (JST-PH) → SS34 → `VSYS`.
